@@ -1,0 +1,210 @@
+    1  ls -al
+    2  ls
+    3  git
+    4  exit
+    5  w
+    6  sudo yum update -y
+    7  uname -a
+    8  sudo yum groupinstall -y "Web Server" "MySQL Database" "PHP Support"
+    9  sudo yum install -y php-mysql
+   10  sudo service httpd start
+   11  sudo chkconfig httpd on
+   12  chkconfig --list httpd
+   13  ls -l /var/www
+   14  groups
+   15  users
+   16  sudo groupadd www
+   17  group
+   18  groups
+   19  sudo usermod -a -G www ec2-user
+   20  groups
+   21  exit
+   22  groups
+   23  sudo chown -R root:www /var/www
+   24  sudo chmod 2775 /var/www
+   25  ls -l /var/www
+   26  find /var/www -type d -exec sudo chmod 2775 {} +
+   27  find /var/www -type f -exec sudo chmod 0664 {} +
+   28  ls -l /var/www
+   29  ls
+   30  echo "<?php phpinfo(); ?>" > /var/www/html/floris.php
+   31  ls
+   32  pwd
+   33  ls
+   34  ls -al
+   35  yum list installed php
+   36  ps -ef
+   37  ps -ef | grep sql
+   38  sudo ps -ef
+   39  yum list installed
+   40  yum list installed | grep sql
+   41  ls
+   42  ls -al
+   43  sudo yum install git
+   44  ls
+   45  ls -al
+   46  ls
+   47  git config --global user.name "Steve Duan"
+   48  git config --global user.email "xdduan@gmail.com"
+   49  ls
+   50  git clone https://github.com/sduan/Floris.git
+   51  ls -al
+   52  cd Floris/
+   53  ls
+   54  ls -al
+   55  ls /var/www/html/ -al
+   56  ls -l /var/www
+   57  tree
+   58  ls -l /var/www/cgi-bin/
+   59  ls -l /var/www/error/
+   60  ls
+   61  ls -l /var/www/icons/
+   62  ls
+   63  mkdir backend
+   64  ls
+   65  cd backend/
+   66  ls'
+   67  mkdir www
+   68  cd www
+   69  ls
+   70  mkdir html
+   71  ls
+   72  cp /var/www/html/floris.php html/
+   73  ls
+   74  cd ..
+   75  ls
+   76  mkdir scripts
+   77  cd 
+   78  ls
+   79  cd /var/www/
+   80  ls
+   81  mv html/ html_bak
+   82  ls -al
+   83  ls
+   84  sudo ln -s html /home/ec2-user/Floris/backend/www/html
+   85  ls -al
+   86  ls -al /home/ec2-user/Floris/backend/www/html
+   87  rm /home/ec2-user/Floris/backend/www/html/html
+   88  ls -al /home/ec2-user/Floris/backend/www/html
+   89  sudo ln -s /home/ec2-user/Floris/backend/www/html html
+   90  ls -al
+   91  ls html
+   92  ls -al
+   93  ls -al html
+   94  ls -al html/
+   95  ls html_bak/
+   96  ls html_bak/ -al
+   97  pwd
+   98  sudo chown -R ec2-user:www /home/ec2-user/Floris/backend/www
+   99  ls -al /home/ec2-user/Floris/backend/www/html
+  100  ls -al /home/ec2-user/Floris/backend/www/
+  101  w
+  102  cat /etc/users
+  103  sudo cat /etc/users
+  104  pwd
+  105  ls
+  106  ls -al
+  107  sudo cat /etc/passwd
+  108  ls -al /home/ec2-user/
+  109  ls -al /home/ec2-user/Floris/
+  110  cd ba
+  111  sudo chown -R ec2-user:ec2-user /home/ec2-user/Floris/backend/www
+  112  ls -al/home/ec2-user/Floris/backend/www
+  113  ls -al /home/ec2-user/Floris/backend/www
+  114  ls -al /home/ec2-user/Floris/backend/www/html/
+  115  sudo usermod -aG ec2-user apache
+  116  sudo chmod g+x /home/ec2-user
+  117  ls -l /home
+  118  ls
+  119  rm html
+  120  ls
+  121  mv html_bak html
+  122  ls -al
+  123  ps -ef | grep apache
+  124  ls /usr/sbin/httpd/
+  125  /usr/sbin/httpd -V | grep SERVER_CONFIG_FILE
+  126  /usr/sbin/httpd -V
+  127  cat /etc/httpd/conf/httpd.conf
+  128  ls
+  129  cd html/
+  130  ls
+  131  ln -s /home/ec2-user/Floris/backend/www/html floris
+  132  ls -al
+  133  ls floris
+  134  ls floris -al
+  135  ls floris/ -al
+  136  vi /etc/httpd/conf/httpd.conf 
+  137  ls -Z /home/ec2-user/Floris/backend/www/html
+  138  exit
+  139  group
+  140  groups
+  141  users
+  142  users -a
+  143  sudo users -l
+  144  ls -al
+  145  cd /var/www/
+  146  ls
+  147  cd html/
+  148  ls
+  149  rm floris
+  150  ls
+  151  cd 
+  152  ls
+  153  sudo service mysqld start
+  154  sudo chkconfig mysqld on
+  155  exit
+  156  mysql
+  157  ls
+  158  cd /var/www/
+  159  ls
+  160  cd html/
+  161  ls
+  162  mkdir floris
+  163  ls
+  164  mv floris.php floris
+  165  ls
+  166  ls -al
+  167  cd floris/
+  168  ls
+  169  ls
+  170  cd Floris/
+  171  ls
+  172  cd backend/
+  173  ls
+  174  cd scripts/
+  175  ls
+  176  ls -al
+  177  mkdir sql
+  178  ;s
+  179  ls
+  180  cd sql
+  181  ls
+  182  touch create_user.sql
+  183  touch create_db.sql
+  184  touch create_tables.sql
+  185  vi create_user.sql 
+  186  vi create_db.sql 
+  187  vi create_user.sql
+  188  cat create_user.sql 
+  189  mysql
+  190  mysql -u root
+  191  mysql -u floris
+  192  mysql -u floris -p
+  193  ls
+  194  vi create_db.sql 
+  195  vi create_tables.sql 
+  196  cat create_db.sql 
+  197  cat create_tables.sql 
+  198  mysql -u floris -p
+  199  mysql -u floris -p password
+  200  mysql -u floris -p
+  201  ls
+  202  cd Floris/ls
+  203  ls
+  204  cd Floris/
+  205  ls
+  206  cd backend/
+  207  ls
+  208  mkdir log
+  209  cd log
+  210  history >> history.log

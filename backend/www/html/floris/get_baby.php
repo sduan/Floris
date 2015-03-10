@@ -10,11 +10,15 @@ require_once __DIR__ . '/db_connect.php';
 $db = new DB_CONNECT();
  
 // check for post data
-//if (isset($_GET["pid"])) {
-//    $pid = $_GET['pid'];
+if (isset($_GET["ID"])) {
+    $baby_id = $_GET['ID'];
  
     // get a product from products table
-    $result = mysql_query("SELECT * FROM Baby"); //WHERE pid = $pid");
+    //$result = mysql_query("SELECT * FROM Baby");// WHERE ID = $baby_id");
+    $result = mysql_query("SELECT * FROM Baby WHERE ID = '$baby_id'");
+} else {
+    $result = mysql_query("SELECT * FROM Baby");
+}
  
     if (!empty($result)) {
         // check for empty result
@@ -57,12 +61,4 @@ $db = new DB_CONNECT();
         // echo no users JSON
         echo json_encode($response);
     }
-//} else {
-//    // required field is missing
-//    $response["success"] = 0;
-//    $response["message"] = "Required field(s) is missing";
- 
-//    // echoing JSON response
-//    echo json_encode($response);
-//}
 ?>
