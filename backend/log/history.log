@@ -208,3 +208,332 @@
   208  mkdir log
   209  cd log
   210  history >> history.log
+  211  ls
+  212  cat history.log 
+  213  cd 
+  214  pwd
+  215  vi /var/www/html/floris/get_baby.php 
+  216  cd Floris/backend/scripts/
+  217  ls
+  218  cd sql
+  219  ls
+  220  cp create_tables.sql test.sql
+  221  vi test.sql 
+  222  pwd
+  223  ls
+  224  cd ..
+  225  ls
+  226  cd ..
+  227  ls
+  228  cd /var/www/html/floris/
+  229  ls
+  230  touch db_config.php
+  231  vi db_config.php 
+  232  cat db_config.php 
+  233  touch db_connect.php
+  234  vi db_connect.php 
+  235  ls
+  236  touch get_baby.php
+  237  vi get_baby.php 
+  238  ls -al
+  239  pwd
+  240  ls
+  241  ls -al
+  242  cd 
+  243  cd Floris/
+  244  ls
+  245  cd backend/
+  246  ls
+  247  cd www/
+  248  ls
+  249  cd html/
+  250  ls
+  251  pwd
+  252  rm floris.php 
+  253  mkdir floris
+  254  ls
+  255  cd floris/
+  256  ls
+  257  pwd
+  258  ls
+  259  cp /var/www/html/floris/* .
+  260  ls
+  261  ls -al
+  262  cd 
+  263  pwd
+  264  ls
+  265  git status
+  266  cd Floris/
+  267  git status
+  268  git add .
+  269  git status
+  270  git commit -am "init; setup LAMP"
+  271  git push
+  272  pwd
+  273  cat backend/scripts/sql/test.sql 
+  274  mysql -u floris -p
+  275  ls
+  276  cd backend/www/html/floris/
+  277  ls
+  278  cp /var/www/html/floris/* .
+  279  git diff
+  280  git status
+  281  cd 
+  282  git status
+  283  cd Floris/
+  284  git status
+  285  git add .
+  286  git status
+  287  git commit -am "read http post parameter"
+  288  git push
+  289  ls -al
+  290  vi .bashrc 
+  291  exit
+  292  ls
+  293  ls -al
+  294  yum --enablerepo=epel install phpmyadmin
+  295  sudo yum --enablerepo=epel install phpmyadmin
+  296  cd /etc/httpd/conf.d/
+  297  ls
+  298  vi phpMyAdmin.conf 
+  299  sudo service httpd restart
+  300  cd /var/www/html/
+  301  ls
+  302  ls /usr/share/phpMyAdmin/
+  303  vi /etc/httpd/conf.d/phpMyAdmin.conf 
+  304  cp /etc/httpd/conf.d/phpMyAdmin.conf /etc/httpd/conf.d/phpMyAdmin.conf.bak
+  305  sudo cp /etc/httpd/conf.d/phpMyAdmin.conf /etc/httpd/conf.d/phpMyAdmin.conf.bak
+  306  sudo vi /etc/httpd/conf.d/phpMyAdmin.conf
+  307  vi /etc/httpd/conf.d/phpMyAdmin.conf 
+  308  sudo vi /etc/httpd/conf.d/phpMyAdmin.conf
+  309  sudo service httpd restart
+  310  mysql
+  311  mysql -u floris -p
+  312  ls
+  313  cd /var/www/html/
+  314  ls
+  315  cd floris/
+  316  ls
+  317  upload_image.php
+  318  touch upload_image.php
+  319  vi upload_image.php 
+  320  ls
+  321  vi upload_image.php 
+  322  cat floris.php 
+  323  cat get_baby.ph
+  324  ls
+  325  cat db_connect.php 
+  326  vi upload_image.php 
+  327  w
+  328  vi /var/www/html/floris/upload_image.php 
+  329  cat /var/www/html/floris/get_baby.php 
+  330  fg
+  331  mysql
+  332  mysql -u floris -p
+  333  vi /var/www/html/floris/get_baby_picture.php
+  334  cat /var/www/html/floris/get_baby.php 
+  335  ls
+  336  fg
+  337  vi /var/www/html/floris/get_baby_picture.php 
+  338  vi /var/www/html/floris/get_baby.php 
+  339  cat /var/www/html/floris/get_baby.php 
+  340  fg
+  341  vi /var/www/html/floris/upload_image.php 
+  342  cat /var/www/html/floris/get_baby.php 
+  343  vi /var/www/html/floris/upload_image.php 
+  344  du -h
+  345  w
+  346  df -h
+  347  ls
+  348  cd /var/www/html/floris/
+  349  ls
+  350  cat floris.php 
+  351  cp get_baby.php transaction_log.php
+  352  vi transaction_log.php 
+  353  ls
+  354  vi transaction_log.php 
+  355  vi send_post.php
+  356  ls
+  357  vi send_post.php 
+  358  vi transaction_log.php 
+  359  vi send_post.php
+  360  vi transaction_log.php 
+  361  ls
+  362  cd 
+  363  cd Floris/backend/www/html/
+  364  ls
+  365  cd floris/
+  366  ls
+  367  cp /var/www/html/floris/* .
+  368  ls
+  369  cd 
+  370  cd Floris/
+  371  git diff
+  372  git status
+  373  git add .
+  374  git diff
+  375  git commit -am "Added transaction_log and upload_image"
+  376  git push
+  377  php --version
+  378  ls -al
+  379  mkdir Software
+  380  ls
+  381  cd Software/
+  382  ls
+  383  composer
+  384  ls
+  385  curl -s https://getcomposer.org/installer | php
+  386  ls
+  387  mkdir Slim
+  388  cd Slim/
+  389  ls -al ..
+  390  mv ../composer.phar .
+  391  ls
+  392  cat >> composer.json
+  393  php composer.phar install
+  394  ls -al
+  395  ls
+  396  cd 
+  397  ls Software/Slim/vendor/
+  398  cd /var/www/html/
+  399  ls
+  400  cd floris/
+  401  ls
+  402  cp -R ~/Software/Slim/vendor .
+  403  ls -al
+  404  cat >> index.php
+  405  cat index.php 
+  406  ls
+  407  mkdir bak
+  408  ls *.php
+  409  mv *.php bak/
+  410  ls
+  411  vi bak/index.php 
+  412  ls
+  413  mkdir include
+  414  ls ../bak/db_*
+  415  ls bak/db_*
+  416  cp bak/db_* include/
+  417  ls
+  418  ls include/
+  419  mdkir v1
+  420  ls
+  421  mkdir v1
+  422  cd v1
+  423  ls
+  424  cd /var/www/html/
+  425  l
+  426  ls
+  427  cd floris/
+  428  ls
+  429  ls v1
+  430  ls -al v1
+  431  ls
+  432  vi v1/.htacess
+  433  sudo service httpd restart
+  434  ls v1
+  435  ls
+  436  cd include/
+  437  ls
+  438  cat >> pass_hash.php
+  439  cat db_connect.php 
+  440  cat ../bak/get_baby.php 
+  441  ls
+  442  cat >> db_handler.php
+  443  ls
+  444  cat pass_hash.php 
+  445  cat ../bak/index.php 
+  446  cd ..
+  447  ls
+  448  cat >> index.php
+  449  ls -al
+  450  pwd
+  451  rm index.php 
+  452  cat >> index.php
+  453  ls
+  454  cd include/
+  455  ls
+  456  cat db_config.php 
+  457  cat db_connect.php 
+  458  ls
+  459  cat db_handler.php 
+  460  vi db_handler.php 
+  461  cat db_connect.php 
+  462  ls
+  463  vi db_handler.php 
+  464  ls
+  465  cd ..
+  466  l
+  467  ls
+  468  vi index.php 
+  469  grep -rni USER_CREATED_SUCCESSFULLY *
+  470  vi include/db_handler.php 
+  471  grep -rni USER_CREATED_SUCCESSFULLY *
+  472  vi include/db_handler.php 
+  473  vi index.php 
+  474  ls include/
+  475  vi include/db_handler.php 
+  476  cat db_Connect.p
+  477  cat include/db_connect.php 
+  478  cat bak/get_baby.php 
+  479  vi include/db_handler.php 
+  480  vi include/db_connect.php 
+  481  cd include/
+  482  ls
+  483  vi db_connect.php 
+  484  vi db_config.php 
+  485  vi db_connect.php 
+  486  vi db_handler.php 
+  487  ls
+  488  vi db_handler.php 
+  489  grep -rni DbConnect *
+  490  ls
+  491  grep -rni config.phpo
+  492  grep -rni config.php *
+  493  grep -rni dbhand *
+  494  grep -rni dbconn *
+  495  grep -rn dbconn *
+  496  cd ..
+  497  ls
+  498  grep -rni dbhand *
+  499  grep -rni db_hand *
+  500  ls
+  501  vi index.php 
+  502  vi include/db_handler.php 
+  503  vi include/db_connect.php 
+  504  grep -rni dirname *
+  505  vi include/db_handler.php 
+  506  vi index.php 
+  507  vi include/db_handler.php 
+  508  vi index.php 
+  509  vi include/db_handler.php 
+  510  vi index.php 
+  511  vi include/db_handler.php 
+  512  cat bak/get_baby.php 
+  513  vi include/db_handler.php 
+  514  ls bak/
+  515  cat bak/floris.php 
+  516  vi /etc/php.ini 
+  517  sudo yum list installed 
+  518  sudo yum list installed  | grep php
+  519  sudo yum list installed  | grep php | grep mysql
+  520  vi include/db_handler.php 
+  521  sudo yum search mysqlnd
+  522  sudo yum install php-mysqlnd
+  523  sudo rpm -e --nodeps php-mysql
+  524  sudo yum install php-mysqlnd
+  525  sudo service httpd restart
+  526  vi include/db_handler.php 
+  527  vi index.php
+  528  ls
+  529  cd ..
+  530  ls
+  531  cd 
+  532  ls
+  533  cd Floris/
+  534  ls
+  535  cd backend/
+  536  ls
+  537  cd log/
+  538  ls
+  539  history > history.log 
