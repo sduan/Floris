@@ -129,6 +129,41 @@ $app->post('/login', function() use ($app) {
             echoRespnse(200, $response);
         });
 
+/**
+ * User Login
+ * url - /login
+ * method - POST
+ * params - email, password
+ */
+$app->get('/', function() use ($app) {
+
+	$app = \Slim\Slim::getInstance();
+	// Http response code
+	$app->status(200);
+	// setting response content type to html
+	$app->contentType('text/html');
+
+	echo '<html>';
+	echo '<body>';
+	echo '<h1>Please login to system:</h1>';
+
+	// provide form to log in
+	echo '<form method="post" action="index.php/login">';
+	echo '<table>';
+	echo '<tr><td>Userid/E-Mail:</td>';
+	echo '<td><input type="text" name="email"></td></tr>';
+	echo '<tr><td>Password:</td>';
+	echo '<td><input type="password" name="password"></td></tr>';
+	echo '<tr><td colspan="2" align="center">';
+	echo '<input type="submit" value="login"></td></tr>';
+	echo '</table></form>';
+
+	echo '</body>';
+	echo '</html>';
+
+        });
+
+
 /*
  * ------------------------ METHODS WITH AUTHENTICATION ------------------------
  */
