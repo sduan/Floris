@@ -1,4 +1,6 @@
 <?php
+session_cache_limiter(false);
+session_start();
 
 require_once 'include/db_config.php';
 require_once 'include/db_handler.php';
@@ -115,6 +117,7 @@ $app->post('/login', function() use ($app) {
                     $response['email'] = $user['email'];
                     $response['apiKey'] = $user['api_key'];
                     $response['createdAt'] = $user['created_at'];
+		    $_SESSION['valid_user'] = $user['name'];
                 } else {
                     // unknown error occurred
                     $response['error'] = true;
@@ -145,18 +148,24 @@ $app->get('/', function() use ($app) {
 
 	echo '<html>';
 	echo '<body>';
-	echo '<h1>Please login to system:</h1>';
 
-	// provide form to log in
-	echo '<form method="post" action="index.php/login">';
-	echo '<table>';
-	echo '<tr><td>Userid/E-Mail:</td>';
-	echo '<td><input type="text" name="email"></td></tr>';
-	echo '<tr><td>Password:</td>';
-	echo '<td><input type="password" name="password"></td></tr>';
-	echo '<tr><td colspan="2" align="center">';
-	echo '<input type="submit" value="login"></td></tr>';
-	echo '</table></form>';
+	if (isset($_SESSION['valid_user'])) {
+		echo 'You are logged in as: '.$_SESSION['valid_user'].' <br />';
+	}
+	else {
+		echo '<h1>Please login to system:</h1>';
+
+		// provide form to log in
+		echo '<form method="post" action="index.php/login">';
+		echo '<table>';
+		echo '<tr><td>Userid/E-Mail:</td>';
+		echo '<td><input type="text" name="email"></td></tr>';
+		echo '<tr><td>Password:</td>';
+		echo '<td><input type="password" name="password"></td></tr>';
+		echo '<tr><td colspan="2" align="center">';
+		echo '<input type="submit" value="login"></td></tr>';
+		echo '</table></form>';
+	}
 
 	echo '</body>';
 	echo '</html>';
