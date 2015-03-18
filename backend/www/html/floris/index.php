@@ -11,6 +11,11 @@ require 'vendor/autoload.php';
 
 $app = new \Slim\Slim();
 
+// debugging
+$app->config('debug', true);
+$app->log->setEnabled(true);
+$app->log->setLevel(\Slim\Log::DEBUG);
+
 // User id from db - Global Variable
 $user_id = NULL;
 
@@ -118,6 +123,9 @@ $app->post('/login', function() use ($app) {
                     $response['apiKey'] = $user['api_key'];
                     $response['createdAt'] = $user['created_at'];
 		    $_SESSION['valid_user'] = $user['name'];
+
+		    $app = \Slim\Slim::getInstance();
+		    $app->log->debug("User loged in:".$user['name']);
                 } else {
                     // unknown error occurred
                     $response['error'] = true;
@@ -156,7 +164,7 @@ $app->get('/', function() use ($app) {
 		echo '<h1>Please login to system:</h1>';
 
 		// provide form to log in
-		echo '<form method="post" action="index.php/login">';
+		echo '<form method="post" action="/floris/index.php/login">';
 		echo '<table>';
 		echo '<tr><td>Userid/E-Mail:</td>';
 		echo '<td><input type="text" name="email"></td></tr>';
@@ -169,6 +177,28 @@ $app->get('/', function() use ($app) {
 
 	echo '</body>';
 	echo '</html>';
+
+        });
+
+
+/**
+ * User Logout
+ * url - /logout
+ * method - POST
+ * params - 
+ */
+$app->get('/logout', function() use ($app) {
+	if(isset($_SESSION['valid_user'])) {
+		session_destroy();
+		$_SESSION = array();
+	        $response['error'] = false;
+                $response['message'] = "You are now logged out!";
+	}
+	else {
+        	$response['error'] = true;
+		$response['message'] = "You are not logged in!";
+	}
+	echoRespnse(200, $response);
 
         });
 
