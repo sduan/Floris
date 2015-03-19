@@ -1,7 +1,7 @@
 <?php
 include_once 'db_config.php';
 
-class Database{
+class Database {
     private $host      = DB_HOST;
     private $user      = DB_USERNAME;
     private $pass      = DB_PASSWORD;

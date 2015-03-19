@@ -1,27 +1,11 @@
 <?php
-session_cache_limiter(false);
-//session_start();
-
 require_once 'include/db_config.php';
 require_once 'include/db_handler.php';
 require_once 'include/pass_hash.php';
-require_once 'include/database.php';
-require_once 'include/session.php';
-require 'vendor/autoload.php';
+require_once 'include/floris.php';
 
-//\Slim\Slim::registerAutoloader();
-
-$app = new \Slim\Slim();
-
-// debugging
-$app->config('debug', true);
-$app->log->setEnabled(true);
-$app->log->setLevel(\Slim\Log::DEBUG);
-
-error_log("test1", 0);
-//$db = new Database;
-$session = new Session;
-error_log("test2", 0);
+$floris = new Floris;
+$app = \Slim\Slim::getInstance();
 
 // User id from db - Global Variable
 $user_id = NULL;

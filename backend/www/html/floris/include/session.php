@@ -23,6 +23,7 @@ class Session {
         );
  
         // Start the session
+        session_cache_limiter(false);
         session_start();
     }
 
