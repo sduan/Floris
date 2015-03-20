@@ -6,10 +6,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class Floris
 {
+    private $db;
     private $app;
     private $session;
 
     public function __construct(){
+
+        // Instantiate new Database object
+        $this->db = new Database;
 
         // create slim app
         $this->app = new \Slim\Slim();
@@ -130,15 +134,27 @@ class Floris
         $op_code = $this->app->request()->post('op_code');
         $log = $this->app->request()->post('log');
 
-        $response = array();
-        $response["error"] = false;
-        $response['device_id'] = $device_id;
-        $response['user_id'] = $user_id;
-        $response['sync_id'] = $sync_id;
-        $response['op_code'] = $op_code;
-        $response['log'] = $log;
-        $response['session_name'] = session_name();
+        // Set query
+        //INSERT INTO `transaction_log`(`id`, `device_id`, `user_id`, `sync_id`, `op_code`, `log`) VALUES ([value-1],[value-2],[value-3],[value-4],[value-5],[value-6])
+        $this->db->query('INSERT INTO transaction_log VALUES (:device_id, :user_id, :sync_id, :op_code, :log)');
 
+        // Bind data
+        $this->db->bind(':device_id', $device_id);
+        $this->db->bind(':user_id', $user_id);
+        $this->db->bind(':sync_id', $sync_id);
+        $this->db->bind(':op_code', $op_code);
+        $this->db->bind(':log', $log);
+
+        // Attempt Execution
+        $response = array();
+        // If successful
+        if($this->db->execute()){
+            $response["error"] = false;
+            $response['message'] = "TLog added!";
+        } else {
+            $response["error"] = true;
+            $response['message'] = "Failed adding to TLog!";
+        }
         $this->echoRespnse(200, $response);
     }
 
