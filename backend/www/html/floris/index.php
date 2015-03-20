@@ -10,6 +10,9 @@ $app = \Slim\Slim::getInstance();
 // User id from db - Global Variable
 $user_id = NULL;
 
+// Register REST
+$floris->registerREST();
+
 /**
  * Adding Middle Layer to authenticate every request
  * Checking if the request has valid api key in the 'Authorization' header
@@ -139,6 +142,7 @@ $app->post('/login', function() use ($app) {
  * method - POST
  * params - email, password
  */
+/*
 $app->get('/', function() use ($app) {
 
 	$app = \Slim\Slim::getInstance();
@@ -172,28 +176,8 @@ $app->get('/', function() use ($app) {
 	echo '</html>';
 
         });
+*/
 
-
-/**
- * User Logout
- * url - /logout
- * method - POST
- * params - 
- */
-$app->get('/logout', function() use ($app) {
-	if(isset($_SESSION['valid_user'])) {
-		session_destroy();
-		$_SESSION = array();
-	        $response['error'] = false;
-                $response['message'] = "You are now logged out!";
-	}
-	else {
-        	$response['error'] = true;
-		$response['message'] = "You are not logged in!";
-	}
-	echoRespnse(200, $response);
-
-        });
 
 
 /*
