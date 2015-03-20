@@ -14,16 +14,16 @@ class Floris
         // create slim app
         $this->app = new \Slim\Slim();
         
-	// enable debugging
-	$this->app->config('debug', true);
-	$this->app->log->setEnabled(true);
-	$this->app->log->setLevel(\Slim\Log::DEBUG);
+        // enable debugging
+        $this->app->config('debug', true);
+        $this->app->log->setEnabled(true);
+        $this->app->log->setLevel(\Slim\Log::DEBUG);
 
         // create session
         $this->session = new Session;
 
-	$this->app->log->debug("Init Floris");
-    }   
+        $this->app->log->debug("Init Floris");
+    }
 
     /**
      * Register REST
@@ -32,15 +32,19 @@ class Floris
     public function registerREST() {
         $self = $this;
 
-	// login
+        // login
         $this->app->post('/login', function() use($self) {
             $self->login();
         });
 
-
-	// logout
+        // logout
         $this->app->post('/logout', function() use($self) {
             $self->logout();
+        });
+
+        // add transaction log
+        $this->app->post('/addTLog', function() use($self) {
+            $self->addTLog();
         });
 
     }
@@ -73,7 +77,7 @@ class Floris
                 $response['createdAt'] = $user['created_at'];
                 $response['session_id'] = session_id();
                 $response['session_name'] = session_name();
-		$_SESSION['valid_user'] = $user['name'];
+                $_SESSION['valid_user'] = $user['name'];
 
                 $this->app->log->debug("User loged in:".$user['name']);
             } else {
@@ -109,6 +113,34 @@ class Floris
         $this->echoRespnse(200, $response);
     }
 
+    /**
+     * User addTLog
+     * url - /addTLog
+     * method - POST
+     * params - email, password
+     */
+    public function addTLog () {
+        // check for required params
+        $this->verifyRequiredParams(array('device_id', 'user_id', 'sync_id', 'op_code', 'log'));
+
+        // reading post params
+        $device_id = $this->app->request()->post('device_id');
+        $user_id = $this->app->request()->post('user_id');
+        $sync_id = $this->app->request()->post('sync_id');
+        $op_code = $this->app->request()->post('op_code');
+        $log = $this->app->request()->post('log');
+
+        $response = array();
+        $response["error"] = false;
+        $response['device_id'] = $device_id;
+        $response['user_id'] = $user_id;
+        $response['sync_id'] = $sync_id;
+        $response['op_code'] = $op_code;
+        $response['log'] = $log;
+        $response['session_name'] = session_name();
+
+        $this->echoRespnse(200, $response);
+    }
 
     /**
      * Verifying required params posted or not
