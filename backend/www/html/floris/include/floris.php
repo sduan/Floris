@@ -124,6 +124,13 @@ class Floris
      * params - email, password
      */
     public function addTLog () {
+        if( !$this->isSessionStarted() ) {
+            $response["error"] = true;
+            $response['message'] = "Session is not started!";
+            $this->echoRespnse(200, $response);
+            return;
+        }
+
         // check for required params
         $this->verifyRequiredParams(array('device_id', 'user_id', 'sync_id', 'op_code', 'log'));
 
@@ -135,7 +142,6 @@ class Floris
         $log = $this->app->request()->post('log');
 
         // Set query
-        //INSERT INTO `transaction_log`(`id`, `device_id`, `user_id`, `sync_id`, `op_code`, `log`) VALUES ([value-1],[value-2],[value-3],[value-4],[value-5],[value-6])
         $this->db->query('INSERT INTO transaction_log (`device_id`, `user_id`, `sync_id`, `op_code`, `log`) VALUES (:device_id, :user_id, :sync_id, :op_code, :log)');
 
         // Bind data
@@ -156,6 +162,14 @@ class Floris
             $response['message'] = "Failed adding to TLog!";
         }
         $this->echoRespnse(200, $response);
+    }
+
+    /**
+     * Check if the session started
+     */
+    public function isSessionStarted() {
+        return session_status() === PHP_SESSION_ACTIVE ? true : false;
+        //return isset($_SESSION['valid_user']) ? true : false;
     }
 
     /**
