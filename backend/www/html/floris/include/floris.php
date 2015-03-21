@@ -1,5 +1,4 @@
 <?php
-require_once 'db_handler.php';
 require_once 'database.php';
 require_once 'session.php';
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -68,22 +67,34 @@ class Floris
         $password = $this->app->request()->post('password');
         $response = array();
 
-        $db = new DbHandler();
-        // check for correct email and password
-        if ($db->checkLogin($email, $password)) {
-            // get the user by email
-            $user = $db->getUserByEmail($email);
-            if ($user != NULL) {
-                $response["error"] = false;
-                $response['name'] = $user['name'];
-                $response['email'] = $user['email'];
-                $response['apiKey'] = $user['api_key'];
-                $response['createdAt'] = $user['created_at'];
-                $response['session_id'] = session_id();
-                $response['session_name'] = session_name();
-                $_SESSION['valid_user'] = $user['name'];
+        // Set query
+        $this->db->query('SELECT name, email, api_key, status, created_at, password_hash FROM users WHERE email = :email');
+   
+        // Bind the email
+        $this->db->bind(':email', $email);
+ 
+        if($this->db->execute()){
+            // Save returned row
+            $user = $this->db->single();
+            if( ($user != null) && ($this->db->rowCount() > 0) ) {
+                if (PassHash::check_password($user['password_hash'], $password)) {
+                    $response["error"] = false;
+                    $response['name'] = $user['name'];
+                    $response['email'] = $user['email'];
+                    $response['apiKey'] = $user['api_key'];
+                    $response['createdAt'] = $user['created_at'];
+                    $response['session_id'] = session_id();
+                    $response['session_name'] = session_name();
+                    $response['last_login'] = time();
+                    $_SESSION['valid_user'] = $user['name'];
+                    $_SESSION['last_login'] = $response['last_login'];
 
-                $this->app->log->debug("User loged in:".$user['name']);
+                    $this->app->log->debug("User loged in:".$user['name']);
+                } else {
+                    // user credentials are wrong
+                    $response['error'] = true;
+                    $response['message'] = 'Login failed. Incorrect credentials';
+                }
             } else {
                 // unknown error occurred
                 $response['error'] = true;

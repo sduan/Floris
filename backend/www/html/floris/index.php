@@ -96,6 +96,7 @@ $app->post('/register', function() use ($app) {
  * method - POST
  * params - email, password
  */
+/*
 $app->post('/login', function() use ($app) {
             // check for required params
             verifyRequiredParams(array('email', 'password'));
@@ -135,6 +136,7 @@ $app->post('/login', function() use ($app) {
 
             echoRespnse(200, $response);
         });
+*/
 
 /**
  * User Login
