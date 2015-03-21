@@ -168,8 +168,8 @@ class Floris
      * Check if the session started
      */
     public function isSessionStarted() {
-        return session_status() === PHP_SESSION_ACTIVE ? true : false;
-        //return isset($_SESSION['valid_user']) ? true : false;
+        //return session_status() === PHP_SESSION_ACTIVE ? true : false;
+        return isset($_SESSION['valid_user']) ? true : false;
     }
 
     /**
