@@ -109,7 +109,7 @@ class Floris
         //     $response['message'] = 'Login failed. Incorrect credentials';
         // }
 
-        $response['error_code'] = $this->db_handler->checkLogin($eamil, $password);
+        $response['error_code'] = $this->db_handler->checkLogin($email, $password);
         if( $response['error_code'] === ERROR_CODE_LOGIN_FAILED ) {
             // unknown error occurred
             $response['message'] = "An error occurred. Please try again";
@@ -120,7 +120,7 @@ class Floris
             // log in success
             $response['session_id'] = session_id();
             $response['message'] = "Successfully logged in";
-        }
+       }
 
         $this->echoRespnse(200, $response);
     }

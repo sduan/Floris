@@ -325,21 +325,24 @@ class DBHandler {
         // Bind the email
         $this->db->bind(':user_id', $user_id);
  
-        if(!$this->db->execute()){
+        if (!$this->db->execute()) {
             return ERROR_CODE_LOGIN_FAILED;
         }
 
-        if( $this->db->rowCount() == 0 ) {
+        if ($this->db->rowCount() == 0) {
+            error_log( "Could not find user:$user_id", 0 );
             return ERROR_CODE_LOGIN_WRONG_CREDENTIAL;
         }
 
         // Save returned row
         $user = $this->db->single();
-        if( !user ) {
+        if (!$user) {
+            error_log( "Could not find valid user:$user_id", 0 );
             return ERROR_CODE_LOGIN_WRONG_CREDENTIAL;   
         }
 
-        if (PassHash::check_password($user['password_hash'], $password)) {
+        if (!PassHash::check_password($user['password_hash'], $password)) {
+            error_log( "Credential not match for user:$user_id", 0 );
             return ERROR_CODE_LOGIN_WRONG_CREDENTIAL;
         }
 
