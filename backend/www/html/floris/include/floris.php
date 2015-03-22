@@ -1,11 +1,13 @@
 <?php
 require_once 'database.php';
+require_once 'db_handler.php';
 require_once 'session.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 class Floris
 {
     private $db;
+    private $db_handler;
     private $app;
     private $session;
 
@@ -13,6 +15,7 @@ class Floris
 
         // Instantiate new Database object
         $this->db = new Database;
+        $this->db_handler = new DBHandler;
 
         // create slim app
         $this->app = new \Slim\Slim();
@@ -67,43 +70,56 @@ class Floris
         $password = $this->app->request()->post('password');
         $response = array();
 
-        // Set query
-        $this->db->query('SELECT name, email, api_key, status, created_at, password_hash FROM users WHERE email = :email');
+        // // Set query
+        // $this->db->query('SELECT name, email, api_key, status, created_at, password_hash FROM users WHERE email = :email');
    
-        // Bind the email
-        $this->db->bind(':email', $email);
+        // // Bind the email
+        // $this->db->bind(':email', $email);
  
-        if($this->db->execute()){
-            // Save returned row
-            $user = $this->db->single();
-            if( ($user != null) && ($this->db->rowCount() > 0) ) {
-                if (PassHash::check_password($user['password_hash'], $password)) {
-                    $response["error"] = false;
-                    $response['name'] = $user['name'];
-                    $response['email'] = $user['email'];
-                    $response['apiKey'] = $user['api_key'];
-                    $response['createdAt'] = $user['created_at'];
-                    $response['session_id'] = session_id();
-                    $response['session_name'] = session_name();
-                    $response['last_login'] = time();
-                    $_SESSION['valid_user'] = $user['name'];
-                    $_SESSION['last_login'] = $response['last_login'];
+        // if($this->db->execute()){
+        //     // Save returned row
+        //     $user = $this->db->single();
+        //     if( ($user != null) && ($this->db->rowCount() > 0) ) {
+        //         if (PassHash::check_password($user['password_hash'], $password)) {
+        //             $response["error"] = false;
+        //             $response['name'] = $user['name'];
+        //             $response['email'] = $user['email'];
+        //             $response['apiKey'] = $user['api_key'];
+        //             $response['createdAt'] = $user['created_at'];
+        //             $response['session_id'] = session_id();
+        //             $response['session_name'] = session_name();
+        //             $response['last_login'] = time();
+        //             $_SESSION['valid_user'] = $user['name'];
+        //             $_SESSION['last_login'] = $response['last_login'];
 
-                    $this->app->log->debug("User loged in:".$user['name']);
-                } else {
-                    // user credentials are wrong
-                    $response['error'] = true;
-                    $response['message'] = 'Login failed. Incorrect credentials';
-                }
-            } else {
-                // unknown error occurred
-                $response['error'] = true;
-                $response['message'] = "An error occurred. Please try again";
-            }
-        } else {
+        //             $this->app->log->debug("User loged in:".$user['name']);
+        //         } else {
+        //             // user credentials are wrong
+        //             $response['error'] = true;
+        //             $response['message'] = 'Login failed. Incorrect credentials';
+        //         }
+        //     } else {
+        //         // unknown error occurred
+        //         $response['error'] = true;
+        //         $response['message'] = "An error occurred. Please try again";
+        //     }
+        // } else {
+        //     // user credentials are wrong
+        //     $response['error'] = true;
+        //     $response['message'] = 'Login failed. Incorrect credentials';
+        // }
+
+        $response['error_code'] = $this->db_handler->checkLogin($eamil, $password);
+        if( $response['error_code'] === ERROR_CODE_LOGIN_FAILED ) {
+            // unknown error occurred
+            $response['message'] = "An error occurred. Please try again";
+        } else if( $response['error_code'] === ERROR_CODE_LOGIN_WRONG_CREDENTIAL ) {
             // user credentials are wrong
-            $response['error'] = true;
-            $response['message'] = 'Login failed. Incorrect credentials';
+            $response['message'] = "Login failed. Incorrect credentials";
+        } else {
+            // log in success
+            $response['session_id'] = session_id();
+            $response['message'] = "Successfully logged in";
         }
 
         $this->echoRespnse(200, $response);
