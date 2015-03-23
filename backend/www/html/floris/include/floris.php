@@ -59,12 +59,10 @@ class Floris
      * ValidateSession
      */
     public function validateSession(){
+        // check if user account locked
         $response = array();
         if(isset($_SESSION[LOCKED]) && $_SESSION[LOCKED]) {
-            $response['error_code'] = ERROR_CODE_ACCOUNT_LOCKED;
-            $response['message'] = "User account locked";
-            $this->echoRespnse(200, $response);
-            $this->app->stop();
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
         }
         return ERROR_CODE_SUCCESS;
     }
@@ -74,11 +72,7 @@ class Floris
      */
     public function lockUser($user_id) {
         $this->db_handler->lockUser($user_id);
-        $response = array();
-        $response['error_code'] = ERROR_CODE_ACCOUNT_LOCKED;
-        $response['message'] = "User account locked";
-        $this->echoRespnse(200, $response);
-        $this->app->stop();
+        $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
     }
 
     /**
@@ -105,9 +99,11 @@ class Floris
      */
     public function login () {
 
-        // validate session
-        $this->validateSession()
-
+        // check if user account locked
+        if(isset($_SESSION[LOCKED]) && $_SESSION[LOCKED]) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
+        }
+ 
         // check for required params
         $this->verifyRequiredParams(array('email', 'password'));
 
@@ -115,80 +111,45 @@ class Floris
         $email = $this->app->request()->post('email');
         $password = $this->app->request()->post('password');
 
-        // // Set query
-        // $this->db->query('SELECT name, email, api_key, status, created_at, password_hash FROM users WHERE email = :email');
-   
-        // // Bind the email
-        // $this->db->bind(':email', $email);
- 
-        // if($this->db->execute()){
-        //     // Save returned row
-        //     $user = $this->db->single();
-        //     if( ($user != null) && ($this->db->rowCount() > 0) ) {
-        //         if (PassHash::check_password($user['password_hash'], $password)) {
-        //             $response["error"] = false;
-        //             $response['name'] = $user['name'];
-        //             $response['email'] = $user['email'];
-        //             $response['apiKey'] = $user['api_key'];
-        //             $response['createdAt'] = $user['created_at'];
-        //             $response['session_id'] = session_id();
-        //             $response['session_name'] = session_name();
-        //             $response['last_login'] = time();
-        //             $_SESSION['valid_user'] = $user['name'];
-        //             $_SESSION['last_login'] = $response['last_login'];
+        // check if user already logged in
+	if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $email)) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_ALREADY_LOGGED_IN, "User account already logged in");
+        }
 
-        //             $this->app->log->debug("User loged in:".$user['name']);
-        //         } else {
-        //             // user credentials are wrong
-        //             $response['error'] = true;
-        //             $response['message'] = 'Login failed. Incorrect credentials';
-        //         }
-        //     } else {
-        //         // unknown error occurred
-        //         $response['error'] = true;
-        //         $response['message'] = "An error occurred. Please try again";
-        //     }
-        // } else {
-        //     // user credentials are wrong
-        //     $response['error'] = true;
-        //     $response['message'] = 'Login failed. Incorrect credentials';
-        // }
-
-        $response = array();
-        $user_info = $this->db_handler->getUserInfo($email, "password_hash, lockedk, reset_passwd");
-        $response['error_code'] = $user_info['error_code'];
+	// get user info	
+        $user_info = $this->db_handler->getUserInfo($email, "password_hash, locked, reset_passwd");
         if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
             if( $user_info['error_code'] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
                 // user credentials are wrong
-                $response['message'] = "Login failed. Incorrect credentials";
+                $message = "Login failed. Incorrect credentials";
             } else if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
                 // unknown error occurred
-                $response['message'] = "An error occurred. Please try again";
+                $message = "An error occurred. Please try again";
             }
             $this->addLoginError($email);
-            $this->echoRespnse(200, $response);
-            $this->app->stop();
+            $this->echoResponse(200, $user_info['error_code'], $message);
         }
 
         // check if account locked
         if( $user_info['data']['locked'] ) {
-            $response['error_code'] = ERROR_CODE_ACCOUNT_LOCKED;
-            $response['message'] = "User account locked";
-            $this->echoRespnse(200, $response);
-            $this->app->stop();
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
         }
 
+	// validate password
         if (!PassHash::check_password($user_info['data']['password_hash'], $password)) {
             $this->app->log->debug("Credential not match for user:$email");
             $this->addLoginError($email);
-            $this->echoRespnse(200, $response);
-            $this->app->stop();
+            $this->echoResponse(200, ERROR_CODE_LOGIN_WRONG_CREDENTIAL, "Incorrect login credential");
+        }
+
+        // check if account need to reset password
+        if( $user_info['data']['reset_passwd'] ) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NEED_RESET_PASSWD, "User account need to reset password");
         }
 
         // log in success
-        $response['session_id'] = session_id();
-        $response['message'] = "Successfully logged in";
-        $this->echoRespnse(200, $response);
+	$_SESSION['user_id'] = $email;
+        $this->echoResponse(200, ERROR_CODE_SUCCESS, "Successfully logged in", session_id());
     }
 
     /**
@@ -196,18 +157,14 @@ class Floris
      * @param $app of Slim
      */
     public function logout() {
-        $response = array();
-        if(isset($_SESSION['valid_user'])) {
+        if(isset($_SESSION['user_id'])) {
             session_destroy();
             $_SESSION = array();
-            $response['error'] = false;
-            $response['message'] = "You are now logged out!";
+            $this->echoResponse(200, ERROR_CODE_SUCCESS, "User logged out");
         }
         else {
-            $response['error'] = true;
-            $response['message'] = "You are not logged in!";
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
         }
-        $this->echoRespnse(200, $response);
     }
 
     /**
@@ -218,10 +175,7 @@ class Floris
      */
     public function addTLog () {
         if( !$this->isSessionStarted() ) {
-            $response["error"] = true;
-            $response['message'] = "Session is not started!";
-            $this->echoRespnse(200, $response);
-            return;
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
         }
 
         // check for required params
@@ -245,16 +199,12 @@ class Floris
         $this->db->bind(':log', $log);
 
         // Attempt Execution
-        $response = array();
         // If successful
         if($this->db->execute()){
-            $response["error"] = false;
-            $response['message'] = "TLog added!";
+            $this->echoResponse(200, ERROR_CODE_SUCCESS, "TLog added!");
         } else {
-            $response["error"] = true;
-            $response['message'] = "Failed adding to TLog!";
+            $this->echoResponse(200, ERROR_CODE_FAIL_ADDING_TLOG, "Failed adding to TLog!");
         }
-        $this->echoRespnse(200, $response);
     }
 
     /**
@@ -288,12 +238,7 @@ class Floris
         if ($error) {
             // Required field(s) are missing or empty
             // echo error json and stop the app
-            $response = array();
-            $app = \Slim\Slim::getInstance();
-            $response["error"] = true;
-            $response["message"] = 'Required field(s) ' . substr($error_fields, 0, -2) . ' is missing or empty';
-            $this->echoRespnse(400, $response);
-            $app->stop();
+            $this->echoResponse(400, ERROR_CODE_INVALID_REST_PARAMS, 'Required field(s) ' . substr($error_fields, 0, -2) . ' is missing or empty');
         }
     }
 
@@ -302,7 +247,8 @@ class Floris
      * @param String $status_code Http response code
      * @param Int $response Json response
      */
-    public function echoRespnse($status_code, $response) {
+    /*
+    public function echoResponse($status_code, $response) {
         $app = \Slim\Slim::getInstance();
         // Http response code
         $app->status($status_code);
@@ -311,6 +257,29 @@ class Floris
         $app->contentType('application/json');
 
         echo json_encode($response);
+    }
+    */
+
+    /**
+     * Echoing json response to client
+     * @param String $status_code Http response code
+     * @param Int $response Json response
+     */
+    public function echoResponse($status_code, $error_code, $message, $session_id=null) {
+        // Http response code
+        $this->app->status($status_code);
+
+        // setting response content type to json
+        $this->app->contentType('application/json');
+
+        $response = array();
+        $response['error_code'] = $error_code;
+        $response['message'] = $message;
+        if($session_id) {
+            $response['session_id'] = $session_id;
+        }
+        echo json_encode($response);
+        $this->app->stop();
     }
 
 }

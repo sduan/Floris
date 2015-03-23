@@ -1,14 +1,14 @@
 <?php
 include_once 'database.php';
 
-class Session {
+/**
+ * Session item name constants
+ */
+define('LOCKED',                                'locked');
+define('USER_ID',                               'user_id');
+define('LOGIN_ERROR_COUNT',                     'login_error_count');
 
-    /**
-     * Session item name constants
-     */
-    define('LOCKED',                                'locked');
-    define('USER_ID',                               'user_id');
-    define('LOGIN_ERROR_COUNT',                     'login_error_count');
+class Session {
 
     /**
      * Db Object

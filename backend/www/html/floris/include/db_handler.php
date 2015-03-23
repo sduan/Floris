@@ -329,23 +329,23 @@ class DBHandler {
 
         if (!$this->db->execute()) {
             $result['error_code'] = ERROR_CODE_DB_QUERY_FAILED;
-            return result;
+            return $result;
         }
 
         if ($this->db->rowCount() == 0) {
             $result['error_code'] = ERROR_CODE_DB_NO_RECORD_FOUND;
-            return result;
+            return $result;
         }
 
         // Save returned row
         $result['data'] = $this->db->single();
         if (!$result['data']) {
             $result['error_code'] = ERROR_CODE_DB_NO_RECORD_FOUND;
-            return result;
+            return $result;
         }
 
         $result['error_code'] = ERROR_CODE_SUCCESS;
-        return result;
+        return $result;
     }
 
 
