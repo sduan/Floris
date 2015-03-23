@@ -150,7 +150,7 @@ class Floris
         // reading post params
         $tlog_info = array();
         $tlog_info[DB_FIELD_DEVICE_ID]     = $this->app->request()->post(DB_FIELD_DEVICE_ID);
-        $tlog_info[DB_FIELD_PASSWORD]       = $this->session->getUserID();
+        $tlog_info[DB_FIELD_USER_ID]       = $this->session->getUserID();
         $tlog_info[DB_FIELD_SYNC_ID]       = $this->app->request()->post(DB_FIELD_SYNC_ID);
         $tlog_info[DB_FIELD_OP_CODE]       = $this->app->request()->post(DB_FIELD_OP_CODE);
         $tlog_info[DB_FIELD_LOG]           = $this->app->request()->post(DB_FIELD_LOG);
