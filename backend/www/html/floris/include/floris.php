@@ -56,19 +56,64 @@ class Floris
     }
 
     /**
+     * ValidateSession
+     */
+    public function validateSession(){
+        $response = array();
+        if(isset($_SESSION[LOCKED]) && $_SESSION[LOCKED]) {
+            $response['error_code'] = ERROR_CODE_ACCOUNT_LOCKED;
+            $response['message'] = "User account locked";
+            $this->echoRespnse(200, $response);
+            $this->app->stop();
+        }
+        return ERROR_CODE_SUCCESS;
+    }
+
+    /**
+     * lockUser
+     */
+    public function lockUser($user_id) {
+        $this->db_handler->lockUser($user_id);
+        $response = array();
+        $response['error_code'] = ERROR_CODE_ACCOUNT_LOCKED;
+        $response['message'] = "User account locked";
+        $this->echoRespnse(200, $response);
+        $this->app->stop();
+    }
+
+    /**
+     * addLoginError
+     */
+    public function addLoginError($user_id) {
+        if(isset($_SESSION[LOGIN_ERROR_COUNT])) {
+            $_SESSION[LOGIN_ERROR_COUNT] += 1;
+            if( $_SESSION[LOGIN_ERROR_COUNT] > 3 ) {
+                // lock user
+                $this->lockUser($user_id);
+            }
+        }
+        else {
+            $_SESSION[LOGIN_ERROR_COUNT] = 1;
+        }
+    }
+
+    /**
      * User Login
      * url - /login
      * method - POST
      * params - email, password
      */
     public function login () {
+
+        // validate session
+        $this->validateSession()
+
         // check for required params
         $this->verifyRequiredParams(array('email', 'password'));
 
         // reading post params
         $email = $this->app->request()->post('email');
         $password = $this->app->request()->post('password');
-        $response = array();
 
         // // Set query
         // $this->db->query('SELECT name, email, api_key, status, created_at, password_hash FROM users WHERE email = :email');
@@ -109,19 +154,40 @@ class Floris
         //     $response['message'] = 'Login failed. Incorrect credentials';
         // }
 
-        $response['error_code'] = $this->db_handler->checkLogin($email, $password);
-        if( $response['error_code'] === ERROR_CODE_LOGIN_FAILED ) {
-            // unknown error occurred
-            $response['message'] = "An error occurred. Please try again";
-        } else if( $response['error_code'] === ERROR_CODE_LOGIN_WRONG_CREDENTIAL ) {
-            // user credentials are wrong
-            $response['message'] = "Login failed. Incorrect credentials";
-        } else {
-            // log in success
-            $response['session_id'] = session_id();
-            $response['message'] = "Successfully logged in";
-       }
+        $response = array();
+        $user_info = $this->db_handler->getUserInfo($email, "password_hash, lockedk, reset_passwd");
+        $response['error_code'] = $user_info['error_code'];
+        if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
+            if( $user_info['error_code'] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
+                // user credentials are wrong
+                $response['message'] = "Login failed. Incorrect credentials";
+            } else if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
+                // unknown error occurred
+                $response['message'] = "An error occurred. Please try again";
+            }
+            $this->addLoginError($email);
+            $this->echoRespnse(200, $response);
+            $this->app->stop();
+        }
 
+        // check if account locked
+        if( $user_info['data']['locked'] ) {
+            $response['error_code'] = ERROR_CODE_ACCOUNT_LOCKED;
+            $response['message'] = "User account locked";
+            $this->echoRespnse(200, $response);
+            $this->app->stop();
+        }
+
+        if (!PassHash::check_password($user_info['data']['password_hash'], $password)) {
+            $this->app->log->debug("Credential not match for user:$email");
+            $this->addLoginError($email);
+            $this->echoRespnse(200, $response);
+            $this->app->stop();
+        }
+
+        // log in success
+        $response['session_id'] = session_id();
+        $response['message'] = "Successfully logged in";
         $this->echoRespnse(200, $response);
     }
 

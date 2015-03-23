@@ -313,6 +313,74 @@ class DBHandler {
 
 
     /**
+     * Get user info
+     * @param String $user_id User login email id
+     * @param String $fields columns interested in users table
+     * @return array[error_code, user_data]
+     */
+    public function getUserInfo($user_id, $fields) {
+        $result = array();
+
+        // Set query
+        $this->db->query("SELECT $fields FROM users WHERE email = :user_id");
+
+        // Bind the email
+        $this->db->bind(':user_id', $user_id);
+
+        if (!$this->db->execute()) {
+            $result['error_code'] = ERROR_CODE_DB_QUERY_FAILED;
+            return result;
+        }
+
+        if ($this->db->rowCount() == 0) {
+            $result['error_code'] = ERROR_CODE_DB_NO_RECORD_FOUND;
+            return result;
+        }
+
+        // Save returned row
+        $result['data'] = $this->db->single();
+        if (!$result['data']) {
+            $result['error_code'] = ERROR_CODE_DB_NO_RECORD_FOUND;
+            return result;
+        }
+
+        $result['error_code'] = ERROR_CODE_SUCCESS;
+        return result;
+    }
+
+
+    /**
+     * Lock User
+     * @param String $user_id User login email id
+     * @return boolean
+     */
+    public function lockUser($user_id, $lock=true) {
+        // Set query
+        $this->db->query("UPDATE users SET locked = $lock WHERE email = :user_id");
+
+        // Bind data
+        $this->db->bind(':user_id', $user_id);
+
+        // Attempt execution
+        // If successful
+        if($this->db->execute()){
+            // Return True
+            return true;
+        }
+        // Return False
+        return false;
+    }
+
+    /**
+     * Unlock User
+     * @param String $user_id User login email id
+     * @return boolean
+     */
+    public function unlockUser($user_id) {
+        $this->lockUser($user_id, false);
+    }
+
+    /**
      * Checking user login
      * @param String $email User login email id
      * @param String $password User login password
