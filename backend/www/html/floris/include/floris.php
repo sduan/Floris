@@ -146,7 +146,7 @@ class Floris
         }
 
         // check for required params
-        $this->verifyRequiredParams(array('device_id', 'user_id', 'sync_id', 'op_code', 'log'));
+        $this->verifyRequiredParams(array('device_id', 'sync_id', 'op_code', 'log'));
 
         // reading post params
         $tlog_info = array();
