@@ -297,6 +297,21 @@
 include_once 'error_code.php';
 include_once 'database.php';
 
+define('DB_FIELD_USER_ID',                               'user_id');
+define('DB_FIELD_PASSWORD',                              'password');
+define('DB_FIELD_PASSWD_HASH',                           'password_hash');
+define('DB_FIELD_RESET_PASSWD',                          'reset_passwd');
+define('DB_FIELD_LOCKED',                                'locked');
+
+define('DB_FIELD_DEVICE_ID',                             'device_id');
+define('DB_FIELD_SYNC_ID',                               'sync_id');
+define('DB_FIELD_OP_CODE',                               'op_code');
+define('DB_FIELD_LOG',                                   'log');
+
+define('RESPONSE_FIELD_ERROR_CODE',                      'error_code');
+define('RESPONSE_FIELD_MESSAGE',                         'message');
+define('RESPONSE_FIELD_SESSION_ID',                      'session_id');
+
 /**
  * Class to handle all db operations
  * This class will have CRUD methods for database tables
@@ -314,7 +329,7 @@ class DBHandler {
 
     /**
      * Get user info
-     * @param String $user_id User login email id
+     * @param String $user_id User login email
      * @param String $fields columns interested in users table
      * @return array[error_code, user_data]
      */
@@ -322,41 +337,41 @@ class DBHandler {
         $result = array();
 
         // Set query
-        $this->db->query("SELECT $fields FROM users WHERE email = :user_id");
+        $this->db->query("SELECT $fields FROM users WHERE user_id = :user_id");
 
-        // Bind the email
+        // Bind the user_id
         $this->db->bind(':user_id', $user_id);
 
         if (!$this->db->execute()) {
-            $result['error_code'] = ERROR_CODE_DB_QUERY_FAILED;
+            $result[RESPONSE_FIELD_ERROR_CODE] = ERROR_CODE_DB_QUERY_FAILED;
             return $result;
         }
 
         if ($this->db->rowCount() == 0) {
-            $result['error_code'] = ERROR_CODE_DB_NO_RECORD_FOUND;
+            $result[RESPONSE_FIELD_ERROR_CODE] = ERROR_CODE_DB_NO_RECORD_FOUND;
             return $result;
         }
 
         // Save returned row
         $result['data'] = $this->db->single();
         if (!$result['data']) {
-            $result['error_code'] = ERROR_CODE_DB_NO_RECORD_FOUND;
+            $result[RESPONSE_FIELD_ERROR_CODE] = ERROR_CODE_DB_NO_RECORD_FOUND;
             return $result;
         }
 
-        $result['error_code'] = ERROR_CODE_SUCCESS;
+        $result[RESPONSE_FIELD_ERROR_CODE] = ERROR_CODE_SUCCESS;
         return $result;
     }
 
 
     /**
      * Lock User
-     * @param String $user_id User login email id
+     * @param String $user_id User login email
      * @return boolean
      */
     public function lockUser($user_id, $lock=true) {
         // Set query
-        $this->db->query("UPDATE users SET locked = $lock WHERE email = :user_id");
+        $this->db->query("UPDATE users SET locked = $lock WHERE user_id = :user_id");
 
         // Bind data
         $this->db->bind(':user_id', $user_id);
@@ -373,7 +388,7 @@ class DBHandler {
 
     /**
      * Unlock User
-     * @param String $user_id User login email id
+     * @param String $user_id User login email
      * @return boolean
      */
     public function unlockUser($user_id) {
@@ -390,11 +405,11 @@ class DBHandler {
         $this->db->query('INSERT INTO transaction_log (`device_id`, `user_id`, `sync_id`, `op_code`, `log`) VALUES (:device_id, :user_id, :sync_id, :op_code, :log)');
 
         // Bind data
-        $this->db->bind(':device_id',   $tlog_info['device_id']);
-        $this->db->bind(':user_id',     $tlog_info['user_id']);
-        $this->db->bind(':sync_id',     $tlog_info['sync_id']);
-        $this->db->bind(':op_code',     $tlog_info['op_code']);
-        $this->db->bind(':log',         $tlog_info['log']);
+        $this->db->bind(':device_id',   $tlog_info[DB_FIELD_DEVICE_ID]);
+        $this->db->bind(':user_id',     $tlog_info[DB_FIELD_USER_ID]);
+        $this->db->bind(':sync_id',     $tlog_info[DB_FIELD_SYNC_ID]);
+        $this->db->bind(':op_code',     $tlog_info[DB_FIELD_OP_CODE]);
+        $this->db->bind(':log',         $tlog_info[DB_FIELD_LOG]);
 
         // Attempt Execution
         // If successful
@@ -403,43 +418,6 @@ class DBHandler {
         } else {
             return ERROR_CODE_FAIL_ADDING_TLOG;
         }
-    }
-
-    /**
-     * Checking user login
-     * @param String $email User login email id
-     * @param String $password User login password
-     * @return boolean User login status success/fail
-     */
-    public function checkLogin($user_id, $password) {
-        // Set query
-        $this->db->query('SELECT password_hash FROM users WHERE email = :user_id');
-   
-        // Bind the email
-        $this->db->bind(':user_id', $user_id);
- 
-        if (!$this->db->execute()) {
-            return ERROR_CODE_LOGIN_FAILED;
-        }
-
-        if ($this->db->rowCount() == 0) {
-            error_log( "Could not find user:$user_id", 0 );
-            return ERROR_CODE_LOGIN_WRONG_CREDENTIAL;
-        }
-
-        // Save returned row
-        $user = $this->db->single();
-        if (!$user) {
-            error_log( "Could not find valid user:$user_id", 0 );
-            return ERROR_CODE_LOGIN_WRONG_CREDENTIAL;   
-        }
-
-        if (!PassHash::check_password($user['password_hash'], $password)) {
-            error_log( "Credential not match for user:$user_id", 0 );
-            return ERROR_CODE_LOGIN_WRONG_CREDENTIAL;
-        }
-
-        return ERROR_CODE_SUCCESS;
     }
 
 }

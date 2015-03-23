@@ -62,7 +62,7 @@ class Floris
      * User Login
      * url - /login
      * method - POST
-     * params - email, password
+     * params - user_id, password, device_id, device_name
      */
     public function login () {
 
@@ -72,50 +72,50 @@ class Floris
         }
  
         // check for required params
-        $this->verifyRequiredParams(array('email', 'password'));
+        $this->verifyRequiredParams(array(DB_FIELD_USER_ID, DB_FIELD_PASSWORD));
 
         // reading post params
-        $email = $this->app->request()->post('email');
-        $password = $this->app->request()->post('password');
+        $user_id = $this->app->request()->post(DB_FIELD_USER_ID);
+        $password = $this->app->request()->post(DB_FIELD_PASSWORD);
 
         // check if user already logged in
-        if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $email)) {
+        if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $user_id)) {
             $this->echoResponse(200, ERROR_CODE_ACCOUNT_ALREADY_LOGGED_IN, "User account already logged in");
         }
 
         // get user info
-        $user_info = $this->db_handler->getUserInfo($email, "password_hash, locked, reset_passwd");
-        if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
-            if( $user_info['error_code'] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
+        $user_info = $this->db_handler->getUserInfo($user_id, "password_hash, locked, reset_passwd");
+        if( $user_info[RESPONSE_FIELD_ERROR_CODE] !== ERROR_CODE_SUCCESS ) {
+            if( $user_info[RESPONSE_FIELD_ERROR_CODE] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
                 // user credentials are wrong
                 $message = "Login failed. Incorrect credentials";
-            } else if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
+            } else if( $user_info[RESPONSE_FIELD_ERROR_CODE] !== ERROR_CODE_SUCCESS ) {
                 // unknown error occurred
                 $message = "An error occurred. Please try again";
             }
-            $this->addLoginError($email);
-            $this->echoResponse(200, $user_info['error_code'], $message);
+            $this->addLoginError($user_id);
+            $this->echoResponse(200, $user_info[RESPONSE_FIELD_ERROR_CODE], $message);
         }
 
         // check if account locked
-        if( $user_info['data']['locked'] ) {
+        if( $user_info['data'][DB_FIELD_LOCKED] ) {
             $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
         }
 
         // validate password
-        if (!PassHash::check_password($user_info['data']['password_hash'], $password)) {
-            $this->app->log->debug("Credential not match for user:$email");
-            $this->addLoginError($email);
+        if (!PassHash::check_password($user_info['data'][DB_FIELD_PASSWD_HASH], $password)) {
+            $this->app->log->debug("Credential not match for user:$user_id");
+            $this->addLoginError($user_id);
             $this->echoResponse(200, ERROR_CODE_LOGIN_WRONG_CREDENTIAL, "Incorrect login credential");
         }
 
         // check if account need to reset password
-        if( $user_info['data']['reset_passwd'] ) {
+        if( $user_info['data'][DB_FIELD_RESET_PASSWD] ) {
             $this->echoResponse(200, ERROR_CODE_ACCOUNT_NEED_RESET_PASSWD, "User account need to reset password");
         }
 
         // log in success
-        $_SESSION['user_id'] = $email;
+        $_SESSION[USER_ID] = $user_id;
         $this->echoResponse(200, ERROR_CODE_SUCCESS, "Successfully logged in", session_id());
     }
 
@@ -124,12 +124,11 @@ class Floris
      * @param $app of Slim
      */
     public function logout() {
-        if(isset($_SESSION['user_id'])) {
+        if(isset($_SESSION[USER_ID])) {
             session_destroy();
             $_SESSION = array();
             $this->echoResponse(200, ERROR_CODE_SUCCESS, "User logged out");
-        }
-        else {
+        } else {
             $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
         }
     }
@@ -138,7 +137,7 @@ class Floris
      * User addTLog
      * url - /addTLog
      * method - POST
-     * params - email, password
+     * params - device_id, sync_id, op_code, log
      */
     public function addTLog () {
         if( !$this->isSessionStarted() ) {
@@ -146,15 +145,15 @@ class Floris
         }
 
         // check for required params
-        $this->verifyRequiredParams(array('device_id', 'sync_id', 'op_code', 'log'));
+        $this->verifyRequiredParams(array(DB_FIELD_DEVICE_ID, DB_FIELD_SYNC_ID, DB_FIELD_OP_CODE, DB_FIELD_LOG));
 
         // reading post params
         $tlog_info = array();
-        $tlog_info['device_id']     = $this->app->request()->post('device_id');
-        $tlog_info['user_id']       = $this->session->getUserID();
-        $tlog_info['sync_id']       = $this->app->request()->post('sync_id');
-        $tlog_info['op_code']       = $this->app->request()->post('op_code');
-        $tlog_info['log']           = $this->app->request()->post('log');
+        $tlog_info[DB_FIELD_DEVICE_ID]     = $this->app->request()->post(DB_FIELD_DEVICE_ID);
+        $tlog_info[DB_FIELD_PASSWORD]       = $this->session->getUserID();
+        $tlog_info[DB_FIELD_SYNC_ID]       = $this->app->request()->post(DB_FIELD_SYNC_ID);
+        $tlog_info[DB_FIELD_OP_CODE]       = $this->app->request()->post(DB_FIELD_OP_CODE);
+        $tlog_info[DB_FIELD_LOG]           = $this->app->request()->post(DB_FIELD_LOG);
         $result = $this->db_handler->addTLog($tlog_info);
 
         if($result == ERROR_CODE_SUCCESS){
@@ -254,10 +253,10 @@ class Floris
         $this->app->contentType('application/json');
 
         $response = array();
-        $response['error_code'] = $error_code;
-        $response['message'] = $message;
+        $response[RESPONSE_FIELD_ERROR_CODE] = $error_code;
+        $response[RESPONSE_FIELD_MESSAGE] = $message;
         if($session_id) {
-            $response['session_id'] = $session_id;
+            $response[RESPONSE_FIELD_SESSION_ID] = $session_id;
         }
         echo json_encode($response);
         $this->app->stop();
