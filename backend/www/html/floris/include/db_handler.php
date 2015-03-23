@@ -304,6 +304,9 @@ define('DB_FIELD_RESET_PASSWD',                          'reset_passwd');
 define('DB_FIELD_LOCKED',                                'locked');
 
 define('DB_FIELD_DEVICE_ID',                             'device_id');
+define('DB_FIELD_DEVICE_NAME',                           'device_name');
+define('DB_FIELD_LAST_TRANSACTION_ID',                   'last_transaction_id');
+define('DB_FIELD_LAST_LOGIN_TIME',                       'last_login_time');
 define('DB_FIELD_SYNC_ID',                               'sync_id');
 define('DB_FIELD_OP_CODE',                               'op_code');
 define('DB_FIELD_LOG',                                   'log');
@@ -418,6 +421,39 @@ class DBHandler {
         } else {
             return ERROR_CODE_FAIL_ADDING_TLOG;
         }
+    }
+
+
+    /**
+     * Write
+     */
+    public function upsertUserDevice($user_id, $device_id, $device_name, $last_transaction_id = null){
+        // Create time stamp
+        $last_login_time = time();
+
+        // Set query
+        if($last_transaction_id) {
+            $this->db->query('REPLACE INTO devices (`user_id`, `device_id`, `device_name`, `last_transaction_id`, `last_login_time`) VALUES (:user_id, :device_id, :device_name, :last_transaction_id, :last_login_time)');
+            $this->db->bind(':last_transaction_id',   $last_transaction_id);
+        } else {
+            $this->db->query('REPLACE INTO devices (`user_id`, `device_id`, `device_name`, `last_login_time`) VALUES (:user_id, :device_id, :device_name, :last_login_time)');
+        }
+
+        // Bind data
+        $this->db->bind(':user_id',               $user_id);
+        $this->db->bind(':device_id',             $device_id);
+        $this->db->bind(':device_name',           $device_name);
+        $this->db->bind(':last_login_time',       $last_login_time);
+
+        // Attempt Execution
+        // If successful
+        if($this->db->execute()){
+          // Return True
+          return true;
+        }
+
+        // Return False
+        return false;
     }
 
 }

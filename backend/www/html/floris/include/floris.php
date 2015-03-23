@@ -114,6 +114,13 @@ class Floris
             $this->echoResponse(200, ERROR_CODE_ACCOUNT_NEED_RESET_PASSWD, "User account need to reset password");
         }
 
+        // reading post params
+        $device_id = $this->app->request()->post(DB_FIELD_DEVICE_ID);
+        $device_name = $this->app->request()->post(DB_FIELD_DEVICE_NAME);
+
+        // upsert user device
+        $this->db_handler->upsertUserDevice($user_id, $device_id, $device_name);
+
         // log in success
         $_SESSION[USER_ID] = $user_id;
         $this->echoResponse(200, ERROR_CODE_SUCCESS, "Successfully logged in", session_id());
