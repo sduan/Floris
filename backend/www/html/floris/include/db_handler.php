@@ -381,6 +381,31 @@ class DBHandler {
     }
 
     /**
+     * Adding TLog
+     * @param Array tlog_info
+     * @return boolean User login status success/fail
+     */
+    public function addTLog($tlog_info) {
+        // Set query
+        $this->db->query('INSERT INTO transaction_log (`device_id`, `user_id`, `sync_id`, `op_code`, `log`) VALUES (:device_id, :user_id, :sync_id, :op_code, :log)');
+
+        // Bind data
+        $this->db->bind(':device_id',   $tlog_info['device_id']);
+        $this->db->bind(':user_id',     $tlog_info['user_id']);
+        $this->db->bind(':sync_id',     $tlog_info['sync_id']);
+        $this->db->bind(':op_code',     $tlog_info['op_code']);
+        $this->db->bind(':log',         $tlog_info['log']);
+
+        // Attempt Execution
+        // If successful
+        if($this->db->execute()){
+            return ERROR_CODE_SUCCESS;
+        } else {
+            return ERROR_CODE_FAIL_ADDING_TLOG;
+        }
+    }
+
+    /**
      * Checking user login
      * @param String $email User login email id
      * @param String $password User login password

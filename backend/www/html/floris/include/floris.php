@@ -1,20 +1,17 @@
 <?php
-require_once 'database.php';
 require_once 'db_handler.php';
 require_once 'session.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 class Floris
 {
-    private $db;
     private $db_handler;
     private $app;
     private $session;
 
     public function __construct(){
 
-        // Instantiate new Database object
-        $this->db = new Database;
+        // Instantiate new database handler
         $this->db_handler = new DBHandler;
 
         // create slim app
@@ -55,6 +52,124 @@ class Floris
 
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    // REST Methods
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * User Login
+     * url - /login
+     * method - POST
+     * params - email, password
+     */
+    public function login () {
+
+        // check if user account locked
+        if(isset($_SESSION[LOCKED]) && $_SESSION[LOCKED]) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
+        }
+ 
+        // check for required params
+        $this->verifyRequiredParams(array('email', 'password'));
+
+        // reading post params
+        $email = $this->app->request()->post('email');
+        $password = $this->app->request()->post('password');
+
+        // check if user already logged in
+        if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $email)) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_ALREADY_LOGGED_IN, "User account already logged in");
+        }
+
+        // get user info
+        $user_info = $this->db_handler->getUserInfo($email, "password_hash, locked, reset_passwd");
+        if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
+            if( $user_info['error_code'] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
+                // user credentials are wrong
+                $message = "Login failed. Incorrect credentials";
+            } else if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
+                // unknown error occurred
+                $message = "An error occurred. Please try again";
+            }
+            $this->addLoginError($email);
+            $this->echoResponse(200, $user_info['error_code'], $message);
+        }
+
+        // check if account locked
+        if( $user_info['data']['locked'] ) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
+        }
+
+        // validate password
+        if (!PassHash::check_password($user_info['data']['password_hash'], $password)) {
+            $this->app->log->debug("Credential not match for user:$email");
+            $this->addLoginError($email);
+            $this->echoResponse(200, ERROR_CODE_LOGIN_WRONG_CREDENTIAL, "Incorrect login credential");
+        }
+
+        // check if account need to reset password
+        if( $user_info['data']['reset_passwd'] ) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NEED_RESET_PASSWD, "User account need to reset password");
+        }
+
+        // log in success
+        $_SESSION['user_id'] = $email;
+        $this->echoResponse(200, ERROR_CODE_SUCCESS, "Successfully logged in", session_id());
+    }
+
+    /**
+     * Logout the current session
+     * @param $app of Slim
+     */
+    public function logout() {
+        if(isset($_SESSION['user_id'])) {
+            session_destroy();
+            $_SESSION = array();
+            $this->echoResponse(200, ERROR_CODE_SUCCESS, "User logged out");
+        }
+        else {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
+        }
+    }
+
+    /**
+     * User addTLog
+     * url - /addTLog
+     * method - POST
+     * params - email, password
+     */
+    public function addTLog () {
+        if( !$this->isSessionStarted() ) {
+            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
+        }
+
+        // check for required params
+        $this->verifyRequiredParams(array('device_id', 'user_id', 'sync_id', 'op_code', 'log'));
+
+        // reading post params
+        $tlog_info = array();
+        $tlog_info['device_id']     = $this->app->request()->post('device_id');
+        $tlog_info['user_id']       = $this->app->request()->post('user_id');
+        $tlog_info['sync_id']       = $this->app->request()->post('sync_id');
+        $tlog_info['op_code']       = $this->app->request()->post('op_code');
+        $tlog_info['log']           = $this->app->request()->post('log');
+        $result = $this->db_handler->addTLog($tlog_info);
+
+        if($result == ERROR_CODE_SUCCESS){
+            $this->echoResponse(200, $result, "TLog added!");
+        } else {
+            $this->echoResponse(200, $result, "Failed adding to TLog!");
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    // Helper Methods
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
     /**
      * ValidateSession
      */
@@ -92,122 +207,6 @@ class Floris
     }
 
     /**
-     * User Login
-     * url - /login
-     * method - POST
-     * params - email, password
-     */
-    public function login () {
-
-        // check if user account locked
-        if(isset($_SESSION[LOCKED]) && $_SESSION[LOCKED]) {
-            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
-        }
- 
-        // check for required params
-        $this->verifyRequiredParams(array('email', 'password'));
-
-        // reading post params
-        $email = $this->app->request()->post('email');
-        $password = $this->app->request()->post('password');
-
-        // check if user already logged in
-	if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $email)) {
-            $this->echoResponse(200, ERROR_CODE_ACCOUNT_ALREADY_LOGGED_IN, "User account already logged in");
-        }
-
-	// get user info	
-        $user_info = $this->db_handler->getUserInfo($email, "password_hash, locked, reset_passwd");
-        if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
-            if( $user_info['error_code'] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
-                // user credentials are wrong
-                $message = "Login failed. Incorrect credentials";
-            } else if( $user_info['error_code'] !== ERROR_CODE_SUCCESS ) {
-                // unknown error occurred
-                $message = "An error occurred. Please try again";
-            }
-            $this->addLoginError($email);
-            $this->echoResponse(200, $user_info['error_code'], $message);
-        }
-
-        // check if account locked
-        if( $user_info['data']['locked'] ) {
-            $this->echoResponse(200, ERROR_CODE_ACCOUNT_LOCKED, "User account locked");
-        }
-
-	// validate password
-        if (!PassHash::check_password($user_info['data']['password_hash'], $password)) {
-            $this->app->log->debug("Credential not match for user:$email");
-            $this->addLoginError($email);
-            $this->echoResponse(200, ERROR_CODE_LOGIN_WRONG_CREDENTIAL, "Incorrect login credential");
-        }
-
-        // check if account need to reset password
-        if( $user_info['data']['reset_passwd'] ) {
-            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NEED_RESET_PASSWD, "User account need to reset password");
-        }
-
-        // log in success
-	$_SESSION['user_id'] = $email;
-        $this->echoResponse(200, ERROR_CODE_SUCCESS, "Successfully logged in", session_id());
-    }
-
-    /**
-     * Logout the current session
-     * @param $app of Slim
-     */
-    public function logout() {
-        if(isset($_SESSION['user_id'])) {
-            session_destroy();
-            $_SESSION = array();
-            $this->echoResponse(200, ERROR_CODE_SUCCESS, "User logged out");
-        }
-        else {
-            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
-        }
-    }
-
-    /**
-     * User addTLog
-     * url - /addTLog
-     * method - POST
-     * params - email, password
-     */
-    public function addTLog () {
-        if( !$this->isSessionStarted() ) {
-            $this->echoResponse(200, ERROR_CODE_ACCOUNT_NOT_LOGGED_IN, "User not logged in");
-        }
-
-        // check for required params
-        $this->verifyRequiredParams(array('device_id', 'user_id', 'sync_id', 'op_code', 'log'));
-
-        // reading post params
-        $device_id = $this->app->request()->post('device_id');
-        $user_id = $this->app->request()->post('user_id');
-        $sync_id = $this->app->request()->post('sync_id');
-        $op_code = $this->app->request()->post('op_code');
-        $log = $this->app->request()->post('log');
-
-        // Set query
-        $this->db->query('INSERT INTO transaction_log (`device_id`, `user_id`, `sync_id`, `op_code`, `log`) VALUES (:device_id, :user_id, :sync_id, :op_code, :log)');
-
-        // Bind data
-        $this->db->bind(':device_id', $device_id);
-        $this->db->bind(':user_id', $user_id);
-        $this->db->bind(':sync_id', $sync_id);
-        $this->db->bind(':op_code', $op_code);
-        $this->db->bind(':log', $log);
-
-        // Attempt Execution
-        // If successful
-        if($this->db->execute()){
-            $this->echoResponse(200, ERROR_CODE_SUCCESS, "TLog added!");
-        } else {
-            $this->echoResponse(200, ERROR_CODE_FAIL_ADDING_TLOG, "Failed adding to TLog!");
-        }
-    }
-
-    /**
      * Check if the session started
      */
     public function isSessionStarted() {
@@ -241,24 +240,6 @@ class Floris
             $this->echoResponse(400, ERROR_CODE_INVALID_REST_PARAMS, 'Required field(s) ' . substr($error_fields, 0, -2) . ' is missing or empty');
         }
     }
-
-    /**
-     * Echoing json response to client
-     * @param String $status_code Http response code
-     * @param Int $response Json response
-     */
-    /*
-    public function echoResponse($status_code, $response) {
-        $app = \Slim\Slim::getInstance();
-        // Http response code
-        $app->status($status_code);
-
-        // setting response content type to json
-        $app->contentType('application/json');
-
-        echo json_encode($response);
-    }
-    */
 
     /**
      * Echoing json response to client
