@@ -72,7 +72,7 @@ class Floris
         }
  
         // check for required params
-        $this->verifyRequiredParams(array(DB_FIELD_USER_ID, DB_FIELD_PASSWORD));
+        $this->verifyRequiredParams(array(DB_FIELD_USER_ID, DB_FIELD_PASSWORD, DB_FIELD_DEVICE_ID, DB_FIELD_DEVICE_NAME));
 
         // reading post params
         $user_id = $this->app->request()->post(DB_FIELD_USER_ID);
