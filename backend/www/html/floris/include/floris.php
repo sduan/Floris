@@ -151,7 +151,7 @@ class Floris
         // reading post params
         $tlog_info = array();
         $tlog_info['device_id']     = $this->app->request()->post('device_id');
-        $tlog_info['user_id']       = $this->app->request()->post('user_id');
+        $tlog_info['user_id']       = $this->session->getUserID();
         $tlog_info['sync_id']       = $this->app->request()->post('sync_id');
         $tlog_info['op_code']       = $this->app->request()->post('op_code');
         $tlog_info['log']           = $this->app->request()->post('log');
@@ -211,7 +211,7 @@ class Floris
      */
     public function isSessionStarted() {
         //return session_status() === PHP_SESSION_ACTIVE ? true : false;
-        return isset($_SESSION['valid_user']) ? true : false;
+        return isset($_SESSION[USER_ID]) ? true : false;
     }
 
     /**

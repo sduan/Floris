@@ -156,4 +156,14 @@ class Session {
       return false;
     }
 
+    /**
+     * Get Session User ID
+     */
+    public function getUserID(){
+        if( isset($_SESSION[USER_ID]) ) {
+            return $_SESSION[USER_ID];
+        }
+        return null;
+    }
+
 }
