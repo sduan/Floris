@@ -456,6 +456,60 @@ class DBHandler {
         return false;
     }
 
+
+    public function createUser($name, $user_id, $password, $account_type, $device_id, $device_name, $app_id) {
+
+        if( $this->isUserExists($user_id) ) {
+            return ERROR_CODE_USER_ALREADY_EXISTED;
+        }
+
+        // Generating password hash
+        $password_hash = PassHash::hash($password);
+
+        // Set query
+        $this->db->query('REPLACE INTO users (`name`, `user_id`, `password_hash`, `account_type`, `app_id`) VALUES (:name, :user_id, :password_hash, :account_type, :app_id)');
+
+        // Bind data
+        $this->db->bind(':name',                  $name);
+        $this->db->bind(':user_id',               $user_id);
+        $this->db->bind(':password_hash',         $password_hash);
+        $this->db->bind(':account_type',          $account_type);
+        $this->db->bind(':app_id',                $app_id);
+
+        // Attempt Execution
+        // If successful
+        if($this->db->execute()){
+          // Return True
+          return ERROR_CODE_SUCCESS;
+        }
+
+        // Return False
+        return ERROR_CODE_USER_CREATE_FAILED;
+    }
+
+    /**
+     * Checking for duplicate user by email address
+     * @param String $user_id email to check in db
+     * @return boolean
+     */
+    private function isUserExists($user_id) {
+        // Set query
+        $this->db->query("SELECT id from users WHERE user_id = :user_id");
+
+        // Bind data
+        $this->db->bind(':user_id',               $user_id);
+
+        if (!$this->db->execute()) {
+            return false;
+        }
+
+        if ($this->db->rowCount() != 1) {
+            return false;
+        }
+
+        return true;
+    }
+
 }
 
 ?>

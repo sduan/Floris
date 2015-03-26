@@ -5,7 +5,7 @@
  */
 
 define('ERROR_CODE_SUCCESS',                                0);
-define('ERROR_CODE_USER_CREATED_SUCCESSFULLY',              1);
+define('ERROR_CODE_TEMP_USER_CREATED_SUCCESSFULLY',         1);
 define('ERROR_CODE_USER_CREATE_FAILED',                     2);
 define('ERROR_CODE_USER_ALREADY_EXISTED',                   3);
 
@@ -24,5 +24,7 @@ define('ERROR_CODE_ACCOUNT_NOT_LOGGED_IN',                  11);
 
 define('ERROR_CODE_FAIL_ADDING_TLOG',                       12);
 define('ERROR_CODE_INVALID_REST_PARAMS',                    13);
+
+define('ERROR_CODE_INVALID_EMAIL',                          14);
 
 ?>

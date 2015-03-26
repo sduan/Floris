@@ -50,6 +50,11 @@ class Floris
             $self->addTLog();
         });
 
+        // register new user
+        $this->app->post('/register', function() use($self) {
+            $self->register();
+        });
+
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -170,6 +175,41 @@ class Floris
         }
     }
 
+    /**
+     * User Registration
+     * url - /register
+     * method - POST
+     * params - name, email, password
+     */
+    public function register () {
+        // check for required params
+        this->verifyRequiredParams(array('name', 'user_id', 'password', 'account_type', 'device_id', 'device_name', 'app_id' ));
+
+        // reading post params
+        $name = $app->request->post('name');
+        $user_id = $app->request->post('user_id');
+        $password = $app->request->post('password');
+        $account_type = $app->request->post('account_type');
+        $device_id = $app->request->post('device_id');
+        $device_name = $app->request->post('device_name');
+        $app_id = $app->request->post('app_id');
+
+        // validating email address
+        this->validateEmail($user_id);
+
+        $db = new DbHandler();
+        $res = $this->db_handler->createUser($name, $user_id, $password, $account_type, $device_id, $device_name, $app_id);
+        if ($res == ERROR_CODE_SUCCESS) {
+            $message = "You are successfully registered";
+        } else if ($res == USER_CREATE_FAILED) {
+            $message = "Oops! An error occurred while registereing";
+        } else if ($res == USER_ALREADY_EXISTED) {
+            $message = "Sorry, this email already existed";
+        }
+        // echo json response
+        this->echoRespnse(201, $res, $message);
+    };
+
     ///////////////////////////////////////////////////////////////////////////
     //
     // Helper Methods
@@ -267,6 +307,15 @@ class Floris
         }
         echo json_encode($response);
         $this->app->stop();
+    }
+
+    /**
+     * Validating email address
+     */
+    public function validateEmail($email) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echoResponse(400, ERROR_CODE_INVALID_EMAIL, 'Email address is not valid');
+        }
     }
 
 }

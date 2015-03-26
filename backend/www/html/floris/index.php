@@ -59,6 +59,7 @@ function authenticate(\Slim\Route $route) {
  * method - POST
  * params - name, email, password
  */
+/*
 $app->post('/register', function() use ($app) {
             // check for required params
             verifyRequiredParams(array('name', 'email', 'password'));
@@ -89,6 +90,8 @@ $app->post('/register', function() use ($app) {
             // echo json response
             echoRespnse(201, $response);
         });
+*/
+
 
 /**
  * User Login
