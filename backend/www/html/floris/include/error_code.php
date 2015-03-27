@@ -26,5 +26,6 @@ define('ERROR_CODE_FAIL_ADDING_TLOG',                       12);
 define('ERROR_CODE_INVALID_REST_PARAMS',                    13);
 
 define('ERROR_CODE_INVALID_EMAIL',                          14);
+define('ERROR_CODE_SESSION_TIMEOUT',                        15);
 
 ?>

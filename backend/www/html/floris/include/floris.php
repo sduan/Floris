@@ -25,6 +25,10 @@ class Floris
         // create session
         $this->session = new Session;
 
+        if($this->session->checkSessionTimeout()) {
+            $this->echoResponse(200, ERROR_CODE_SESSION_TIMEOUT, "Session timeout");
+        }
+
         $this->app->log->debug("Init Floris");
     }
 

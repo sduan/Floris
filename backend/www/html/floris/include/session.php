@@ -7,6 +7,8 @@ include_once 'database.php';
 define('LOCKED',                                'locked');
 define('USER_ID',                               'user_id');
 define('LOGIN_ERROR_COUNT',                     'login_error_count');
+define('LAST_ACTIVITY',                         'last_activity');
+define('CREATED',                               'created');
 
 class Session {
 
@@ -166,4 +168,24 @@ class Session {
         return null;
     }
 
+
+    public function checkSessionTimeout() {
+        $timeout = false;
+        if (isset($_SESSION[LAST_ACTIVITY]) && (time() - $_SESSION[LAST_ACTIVITY] > 300)) {
+           // last request was more than 5 minutes ago
+            session_unset();     // unset $_SESSION variable for the run-time
+            session_destroy();   // destroy session data in storage
+            $timeout = true;
+        }
+        $_SESSION[LAST_ACTIVITY] = time(); // update last activity time stamp
+
+        if (!isset($_SESSION[CREATED])) {
+            $_SESSION[CREATED] = time();
+        } else if (time() - $_SESSION[CREATED] > 300) {
+            // session started more than 5 minutes ago
+            session_regenerate_id(true);    // change session ID for the current session an invalidate old session ID
+            $_SESSION[CREATED] = time();  // update creation time
+        }
+        return $timeout;
+    }
 }
