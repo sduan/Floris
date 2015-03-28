@@ -461,7 +461,7 @@ class DBHandler {
 
     public function createUser($name, $user_id, $password, $account_type, $device_id, $device_name, $app_id) {
 
-        if( $this->isUserExists($user_id) ) {
+        if( $this->isUserExists($user_id, $app_id) ) {
             return ERROR_CODE_USER_ALREADY_EXISTED;
         }
 
@@ -494,12 +494,13 @@ class DBHandler {
      * @param String $user_id email to check in db
      * @return boolean
      */
-    private function isUserExists($user_id) {
+    private function isUserExists($user_id, $app_id) {
         // Set query
-        $this->db->query("SELECT id from users WHERE user_id = :user_id");
+        $this->db->query("SELECT id from users WHERE user_id = :user_id and app_id = :app_id");
 
         // Bind data
         $this->db->bind(':user_id',               $user_id);
+        $this->db->bind(':app_id',                $app_id);
 
         if (!$this->db->execute()) {
             return false;
@@ -510,6 +511,34 @@ class DBHandler {
         }
 
         return true;
+    }
+
+
+    public function addPhoto($user_id, $app_id, $device_id, $photo_name, $photo_path) {
+
+        if(!$this->isUserExists($user_id, $app_id)) {
+            return ERROR_CODE_INVALID_USER;
+        }
+
+        // Set query
+        $this->db->query('REPLACE INTO photos (`user_id`, `app_id`, `device_id`, `name`, `path`) VALUES (:user_id, :app_id, :device_id, :photo_name, :photo_path)');
+
+        // Bind data
+        $this->db->bind(':user_id',               $user_id);
+        $this->db->bind(':app_id',                $app_id);
+        $this->db->bind(':device_id',             $device_id);
+        $this->db->bind(':photo_name',            $photo_name);
+        $this->db->bind(':photo_path',            $photo_path);
+
+        // Attempt Execution
+        // If successful
+        if($this->db->execute()){
+          // Return True
+          return ERROR_CODE_SUCCESS;
+        }
+
+        // Return False
+        return ERROR_CODE_ERROR_INSERT_FILE;
     }
 
 }
