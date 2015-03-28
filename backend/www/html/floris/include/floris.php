@@ -214,16 +214,16 @@ class Floris
         // validating email address
         $this->validateEmail($user_id);
 
-        $res = $this->db_handler->createUser($name, $user_id, $password, $account_type, $device_id, $device_name, $app_id);
-        if ($res == ERROR_CODE_SUCCESS) {
+        $ret = $this->db_handler->createUser($name, $user_id, $password, $account_type, $device_id, $device_name, $app_id);
+        if ($ret == ERROR_CODE_SUCCESS) {
             $message = "You are successfully registered";
-        } else if ($res == ERROR_CODE_USER_CREATE_FAILED) {
+        } else if ($ret == ERROR_CODE_USER_CREATE_FAILED) {
             $message = "Oops! An error occurred while registereing";
-        } else if ($res == ERROR_CODE_USER_ALREADY_EXISTED) {
+        } else if ($ret == ERROR_CODE_USER_ALREADY_EXISTED) {
             $message = "Sorry, this email already existed";
         }
         // echo json response
-        $this->echoResponse(201, $res, $message);
+        $this->echoResponse(200, $ret, $message);
     }
 
     /**
@@ -257,13 +257,13 @@ class Floris
         $ret = $this->db_handler->addPhoto($user_id, $app_id, $device_id, $photo_name, $file_name);
         if ($ret == ERROR_CODE_SUCCESS) {
             $message = "Photo successfully uploaded";
-        } else if ($res == ERROR_CODE_ERROR_INSERT_FILE) {
+        } else if ($ret == ERROR_CODE_ERROR_INSERT_FILE) {
             $message = "Oops! An error occurred while uploading photo";
-        } else if ($res == ERROR_CODE_INVALID_USER) {
+        } else if ($ret == ERROR_CODE_INVALID_USER) {
             $message = "Sorry, this user acccount is invalid";
         }
         // echo json response
-        $this->echoResponse(201, $res, $message);
+        $this->echoResponse(200, $ret, $message);
     }
 
     ///////////////////////////////////////////////////////////////////////////
