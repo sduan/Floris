@@ -341,7 +341,7 @@ class DBHandler {
         $result = array();
 
         // Set query
-        $this->db->query("SELECT $fields FROM users WHERE DB_FIELD_USER_ID = :user_id and DB_FIELD_APP_ID = :app_id");
+        $this->db->query("SELECT $fields FROM users WHERE user_id = :user_id and app_id = :app_id");
 
         // Bind the user_id
         $this->db->bind(':user_id', $user_id);

@@ -65,7 +65,7 @@ class Floris
 
         // upload photo
         $this->app->post('/uploadPhoto', function() use($self) {
-            $self->register();
+            $self->uploadPhoto();
         });
 
     }
@@ -104,7 +104,7 @@ class Floris
         }
 
         // get user info
-        $user_info = $this->db_handler->getUserInfo($user_id, "password_hash, locked, reset_passwd");
+        $user_info = $this->db_handler->getUserInfo($user_id, $app_id, "password_hash, locked, reset_passwd");
         if( $user_info[RESPONSE_FIELD_ERROR_CODE] !== ERROR_CODE_SUCCESS ) {
             if( $user_info[RESPONSE_FIELD_ERROR_CODE] === ERROR_CODE_DB_NO_RECORD_FOUND ) {
                 // user credentials are wrong
@@ -248,8 +248,8 @@ class Floris
         }
 
         $tmp_name = $_FILES['photo']['tmp_name'];
-        $file_name = FLORIS_PHOTO_DIR . basename($tmp_name)
-        if( !copy($_FILES['image']['tmp_name'], "/usr/local/floris/photos/".basename($_FILES['image']['tmp_name'])) ) {
+        $file_name = FLORIS_PHOTO_DIR . basename($tmp_name);
+        if( !copy($tmp_name, $file_name) ) {
             $this->echoResponse(200, ERROR_CODE_ERROR_SAVE_FILE, "Error saving file!");
         }
 
