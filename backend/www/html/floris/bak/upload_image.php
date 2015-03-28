@@ -25,6 +25,7 @@
 	echo "Image Name: ", $image_name = $_FILES['image']['name'], "<p />";
 	echo "Image Size: ", $image_size = $_FILES['image']['size'], "<p />";
 	echo "Image Temp Name: ", $image_tmp_name = $_FILES['image']['tmp_name'], "<p />";
+        echo "Image Temp Name: ", copy($_FILES['image']['tmp_name'], "/usr/local/floris/photos/".basename($_FILES['image']['tmp_name'])), "<p />";
 	$image = addslashes(file_get_contents($_FILES['image']['tmp_name']));
 
 	// insert image into DB
