@@ -298,6 +298,7 @@ include_once 'error_code.php';
 include_once 'database.php';
 
 define('DB_FIELD_USER_ID',                               'user_id');
+define('DB_FIELD_APP_ID',                                'app_id');
 define('DB_FIELD_PASSWORD',                              'password');
 define('DB_FIELD_PASSWD_HASH',                           'password_hash');
 define('DB_FIELD_RESET_PASSWD',                          'reset_passwd');
@@ -336,14 +337,15 @@ class DBHandler {
      * @param String $fields columns interested in users table
      * @return array[error_code, user_data]
      */
-    public function getUserInfo($user_id, $fields) {
+    public function getUserInfo($user_id, $app_id, $fields) {
         $result = array();
 
         // Set query
-        $this->db->query("SELECT $fields FROM users WHERE user_id = :user_id");
+        $this->db->query("SELECT $fields FROM users WHERE DB_FIELD_USER_ID = :user_id and DB_FIELD_APP_ID = :app_id");
 
         // Bind the user_id
         $this->db->bind(':user_id', $user_id);
+        $this->db->bind(':app_id', $app_id);
 
         if (!$this->db->execute()) {
             $result[RESPONSE_FIELD_ERROR_CODE] = ERROR_CODE_DB_QUERY_FAILED;

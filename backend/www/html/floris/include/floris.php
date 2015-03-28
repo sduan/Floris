@@ -3,6 +3,10 @@ require_once 'db_handler.php';
 require_once 'session.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
+define('FLORIS_DATA_DIR',                               '/usr/local/floris/');
+define('FLORIS_PHOTO_DIR',                              FLORIS_DATA_DIR . '/photos/');
+define('FLORIS_DB_DIR',                                 FLORIS_DATA_DIR . '/db_files/');
+
 class Floris
 {
     private $db_handler;
@@ -59,6 +63,11 @@ class Floris
             $self->register();
         });
 
+        // upload photo
+        $this->app->post('/uploadPhoto', function() use($self) {
+            $self->register();
+        });
+
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -81,14 +90,16 @@ class Floris
         }
  
         // check for required params
-        $this->verifyRequiredParams(array(DB_FIELD_USER_ID, DB_FIELD_PASSWORD, DB_FIELD_DEVICE_ID, DB_FIELD_DEVICE_NAME));
+        $this->verifyRequiredParams(array(DB_FIELD_USER_ID, DB_FIELD_APP_ID, DB_FIELD_PASSWORD, DB_FIELD_DEVICE_ID, DB_FIELD_DEVICE_NAME));
 
         // reading post params
         $user_id = $this->app->request()->post(DB_FIELD_USER_ID);
+        $app_id = $this->app->request()->post(DB_FIELD_APP_ID);
         $password = $this->app->request()->post(DB_FIELD_PASSWORD);
 
         // check if user already logged in
-        if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $user_id)) {
+        if(isset($_SESSION[USER_ID]) && ($_SESSION[USER_ID] == $user_id) &&
+           isset($_SESSION[DB_FIELD_APP_ID]) && ($_SESSION[DB_FIELD_APP_ID] == $app_id) ) {
             $this->echoResponse(200, ERROR_CODE_ACCOUNT_ALREADY_LOGGED_IN, "User account already logged in");
         }
 
@@ -131,7 +142,9 @@ class Floris
         $this->db_handler->upsertUserDevice($user_id, $device_id, $device_name);
 
         // log in success
-        $_SESSION[USER_ID] = $user_id;
+        $_SESSION[USER_ID]            = $user_id;
+        $_SESSION[DB_FIELD_APP_ID]    = $app_id;
+        $_SESSION[DB_FIELD_DEVICE_ID] = $device_id;
         $this->echoResponse(200, ERROR_CODE_SUCCESS, "Successfully logged in", session_id());
     }
 
@@ -187,11 +200,11 @@ class Floris
      */
     public function register () {
         // check for required params
-        $this->verifyRequiredParams(array('name', 'user_id', 'password', 'account_type', 'device_id', 'device_name', 'app_id' ));
+        $this->verifyRequiredParams(array('name', DB_FIELD_USER_ID, 'password', 'account_type', 'device_id', 'device_name', 'app_id' ));
 
         // reading post params
         $name = $this->app->request->post('name');
-        $user_id = $this->app->request->post('user_id');
+        $user_id = $this->app->request->post(DB_FIELD_USER_ID);
         $password = $this->app->request->post('password');
         $account_type = $this->app->request->post('account_type');
         $device_id = $this->app->request->post('device_id');
@@ -211,6 +224,50 @@ class Floris
         }
         // echo json response
         $this->echoResponse(201, $res, $message);
+    }
+
+    /**
+     * User Upload Photo
+     * url - /uploadPhoto
+     * method - POST
+     * params - name
+     */
+    public function uploadPhoto () {
+        // check for required params
+        $this->verifyRequiredParams(array('name'));
+
+        // reading post params
+        $name = $this->app->request->post('name');
+        $user_id = $_SESSION[USER_ID];
+        $app_id = $_SESSION[DB_FIELD_APP_ID];
+        $device_id = $_SESSION[DB_FIELD_DEVICE_ID];
+
+        // file properties
+        if (!(isset($_FILES['photo']) && $_FILES['photo']['size'] > 0)) {
+            $this->echoResponse(200, ERROR_CODE_INVALID_FILE, "Invalid photo file!");
+        }
+
+        $tmp_name = $_FILES['photo']['tmp_name'];
+        $file_name = FLORIS_PHOTO_DIR . basename($tmp_name)
+        if( !copy($_FILES['image']['tmp_name'], "/usr/local/floris/photos/".basename($_FILES['image']['tmp_name'])) ) {
+            $this->echoResponse(200, ERROR_CODE_ERROR_SAVE_FILE, "Error saving file!");
+        }
+
+        $this->echoResponse(200, ERROR_CODE_SUCCESS, "File uploaded!");
+
+        // // validating email address
+        // $this->validateEmail($user_id);
+
+        // $res = $this->db_handler->createUser($name, $user_id, $password, $account_type, $device_id, $device_name, $app_id);
+        // if ($res == ERROR_CODE_SUCCESS) {
+        //     $message = "You are successfully registered";
+        // } else if ($res == ERROR_CODE_USER_CREATE_FAILED) {
+        //     $message = "Oops! An error occurred while registereing";
+        // } else if ($res == ERROR_CODE_USER_ALREADY_EXISTED) {
+        //     $message = "Sorry, this email already existed";
+        // }
+        // // echo json response
+        // $this->echoResponse(201, $res, $message);
     }
 
     ///////////////////////////////////////////////////////////////////////////
