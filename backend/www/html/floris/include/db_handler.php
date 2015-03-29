@@ -514,14 +514,14 @@ class DBHandler {
     }
 
 
-    public function addPhoto($user_id, $app_id, $device_id, $photo_name, $photo_path) {
+    public function addPhoto($user_id, $app_id, $device_id, $photo_name, $photo_path, $file_hash) {
 
         if(!$this->isUserExists($user_id, $app_id)) {
             return ERROR_CODE_INVALID_USER;
         }
 
         // Set query
-        $this->db->query('REPLACE INTO photos (`user_id`, `app_id`, `device_id`, `name`, `path`) VALUES (:user_id, :app_id, :device_id, :photo_name, :photo_path)');
+        $this->db->query('REPLACE INTO photos (`user_id`, `app_id`, `device_id`, `name`, `path`, `hash`) VALUES (:user_id, :app_id, :device_id, :photo_name, :photo_path, :file_hash)');
 
         // Bind data
         $this->db->bind(':user_id',               $user_id);
@@ -529,6 +529,7 @@ class DBHandler {
         $this->db->bind(':device_id',             $device_id);
         $this->db->bind(':photo_name',            $photo_name);
         $this->db->bind(':photo_path',            $photo_path);
+        $this->db->bind(':file_hash',             $file_hash);
 
         // Attempt Execution
         // If successful

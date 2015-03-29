@@ -234,10 +234,11 @@ class Floris
      */
     public function uploadPhoto () {
         // check for required params
-        $this->verifyRequiredParams(array('name'));
+        $this->verifyRequiredParams(array('name', 'hash'));
 
         // reading post params
         $photo_name = $this->app->request->post('name');
+        $photo_hash = $this->app->request->post('hash');
         $user_id = $_SESSION[USER_ID];
         $app_id = $_SESSION[DB_FIELD_APP_ID];
         $device_id = $_SESSION[DB_FIELD_DEVICE_ID];
@@ -249,12 +250,20 @@ class Floris
 
         $tmp_name = $_FILES['photo']['tmp_name'];
         $file_name = FLORIS_PHOTO_DIR . basename($tmp_name);
+
+        // check file hash
+        $file_hash = hash_file('md5', $tmp_name);
+        if($file_hash != $photo_hash) {
+            $this->echoResponse(200, ERROR_CODE_INVALID_FILE_HASH, "Invalid photo file hash!");
+        }
+
+        // copy file to FLORIS_PHOTO_DIR
         if( !copy($tmp_name, $file_name) ) {
             $this->echoResponse(200, ERROR_CODE_ERROR_SAVE_FILE, "Error saving file!");
         }
 
         // insert photo filename into DB
-        $ret = $this->db_handler->addPhoto($user_id, $app_id, $device_id, $photo_name, $file_name);
+        $ret = $this->db_handler->addPhoto($user_id, $app_id, $device_id, $photo_name, $file_name, $file_hash);
         if ($ret == ERROR_CODE_SUCCESS) {
             $message = "Photo successfully uploaded";
         } else if ($ret == ERROR_CODE_ERROR_INSERT_FILE) {

@@ -33,4 +33,6 @@ define('ERROR_CODE_ERROR_SAVE_FILE',                        17);
 define('ERROR_CODE_ERROR_INSERT_FILE',                      18);
 
 define('ERROR_CODE_INVALID_USER',                           19);
+define('ERROR_CODE_INVALID_FILE_HASH',                      20);
+
 ?>
